@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Ticket Verification — CUJAMMU EVENTHUB</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+</head>
+<body class="auth-bg py-5">
+<div class="container verify-container">
+  <div class="text-center mb-4">
+    <a href="/" class="text-decoration-none">
+      <i class="bi bi-calendar-event-fill text-primary fs-2"></i>
+      <span class="fw-bold fs-4 ms-2 verify-brand-text">CUJAMMU EVENTHUB</span>
+    </a>
+  </div>
+
+  <!-- INVALID ticket -->
+  <div th:unless="${valid}" class="card border-0 shadow-lg rounded-4 text-center p-5">
+    <i class="bi bi-x-circle-fill text-danger verify-icon-lg"></i>
+    <h4 class="fw-bold mt-3 text-danger">Invalid Ticket</h4>
+    <p class="text-muted" th:text="${message}">This ticket could not be verified.</p>
+    <a href="/" class="btn btn-outline-primary mt-2">Back to Home</a>
+  </div>
+
+  <!-- VALID ticket -->
+  <div th:if="${valid}" class="ticket-card">
+    <!-- Header -->
+    <div class="ticket-header text-center">
+      <div class="d-inline-flex align-items-center justify-content-center bg-white bg-opacity-20 rounded-circle mb-3 verify-circle">
+        <i class="bi bi-ticket-perforated-fill fs-2"></i>
+      </div>
+      <h4 class="fw-bold mb-1" th:text="${registration.event.title}">Event Title</h4>
+      <span class="badge"
+            th:classappend="${registration.status.name() == 'ATTENDED'} ? 'bg-warning text-dark' : 'bg-success'"
+            th:text="${registration.status.name() == 'ATTENDED'} ? '✓ USED' : '✓ VALID'">VALID</span>
+    </div>
+
+    <!-- Body -->
+    <div class="ticket-body">
+      <!-- QR Code -->
+      <div class="text-center mb-3">
+        <div class="qr-wrapper">
+          <img th:src="${qrDataUri}" alt="QR Code" class="rounded-3 border p-1"/>
+        </div>
+      </div>
+
+      <div class="ticket-divider"></div>
+
+      <div class="row g-2 mt-2 small">
+        <div class="col-6">
+          <div class="text-muted fw-semibold verify-label">Attendee</div>
+          <div class="fw-bold" th:text="${registration.user.name}">Name</div>
+        </div>
+        <div class="col-6">
+          <div class="text-muted fw-semibold verify-label">Department</div>
+          <div th:text="${registration.user.department}">Dept</div>
+        </div>
+        <div class="col-12">
+          <div class="text-muted fw-semibold verify-label">Date &amp; Time</div>
+          <div th:text="${#temporals.format(registration.event.eventDate,'EEEE, dd MMMM yyyy · hh:mm a')}">Date</div>
+        </div>
+        <div class="col-12">
+          <div class="text-muted fw-semibold verify-label">Venue</div>
+          <div th:text="${registration.event.venue}">Venue</div>
+        </div>
+      </div>
+
+      <div th:if="${registration.status.name() == 'ATTENDED'}"
+           class="alert alert-warning mt-3 mb-0 text-center py-2 small">
+        <i class="bi bi-check-all me-1"></i>Attendance already recorded for this ticket.
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

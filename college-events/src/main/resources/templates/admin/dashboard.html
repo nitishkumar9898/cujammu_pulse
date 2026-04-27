@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin Dashboard — CUJAMMU EVENTHUB</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: adminSidebar(activePage='dashboard')}"></div>
+<div class="main-content">
+  <div th:replace="~{fragments/navbar :: topNav('Admin Dashboard')}"></div>
+  <div class="page-content fade-in">
+    <div th:replace="~{fragments/navbar :: alerts}"></div>
+
+    <!-- Welcome -->
+    <div class="card border-0 mb-4 text-white rounded-4"
+         style="background:linear-gradient(135deg,#6C63FF,#3D35A0)">
+      <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div>
+          <h4 class="fw-bold mb-1">Admin Control Panel 🛡️</h4>
+          <p class="mb-0 opacity-90">Manage all events, users, and platform settings.</p>
+        </div>
+        <a href="/admin/events/pending" class="btn btn-warning fw-bold px-4">
+          <i class="bi bi-hourglass-split me-2"></i>
+          Pending (<span th:text="${pendingEvents}">0</span>)
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats row 1 -->
+    <div class="row g-3 mb-3">
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-primary bg-opacity-10">
+              <i class="bi bi-people text-primary"></i>
+            </div>
+            <div>
+              <div class="fw-bold fs-4" th:text="${totalUsers}">0</div>
+              <div class="text-muted small">Total Users</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-success bg-opacity-10">
+              <i class="bi bi-mortarboard text-success"></i>
+            </div>
+            <div>
+              <div class="fw-bold fs-4" th:text="${totalStudents}">0</div>
+              <div class="text-muted small">Students</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-info bg-opacity-10">
+              <i class="bi bi-person-workspace text-info"></i>
+            </div>
+            <div>
+              <div class="fw-bold fs-4" th:text="${totalOrganizers}">0</div>
+              <div class="text-muted small">Organizers</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-warning bg-opacity-10">
+              <i class="bi bi-ticket-perforated text-warning"></i>
+            </div>
+            <div>
+              <div class="fw-bold fs-4" th:text="${totalRegistrations}">0</div>
+              <div class="text-muted small">Registrations</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats row 2 -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-secondary bg-opacity-10">
+              <i class="bi bi-calendar3 text-secondary"></i>
+            </div>
+            <div>
+              <div class="fw-bold fs-4" th:text="${totalEvents}">0</div>
+              <div class="text-muted small">Total Events</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-warning bg-opacity-10">
+              <i class="bi bi-hourglass-split text-warning"></i>
+            </div>
+            <div>
+              <div class="fw-bold fs-4" th:text="${pendingEvents}">0</div>
+              <div class="text-muted small">Pending</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-success bg-opacity-10">
+              <i class="bi bi-check-circle text-success"></i>
+            </div>
+            <div>
+              <div class="fw-bold fs-4" th:text="${approvedEvents}">0</div>
+              <div class="text-muted small">Approved</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-secondary bg-opacity-10">
+              <i class="bi bi-flag-fill text-secondary"></i>
+            </div>
+            <div>
+              <div class="fw-bold fs-4" th:text="${completedEvents}">0</div>
+              <div class="text-muted small">Completed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Analytics Chart -->
+    <div class="row g-4 mb-4">
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h6 class="fw-bold mb-0"><i class="bi bi-pie-chart me-2 text-primary"></i>Event Status Distribution</h6>
+          </div>
+          <div class="card-body px-4 pb-4 d-flex justify-content-center">
+            <canvas id="eventStatusChart" style="max-width:280px;max-height:280px"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h6 class="fw-bold mb-0"><i class="bi bi-bar-chart me-2 text-success"></i>Platform Overview</h6>
+          </div>
+          <div class="card-body px-4 pb-4">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="p-3 bg-light rounded-3 text-center">
+                  <div class="fw-bold fs-3 text-primary" th:text="${totalUsers}">0</div>
+                  <div class="text-muted small">Total Users</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 bg-light rounded-3 text-center">
+                  <div class="fw-bold fs-3 text-success" th:text="${totalEvents}">0</div>
+                  <div class="text-muted small">Total Events</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 bg-light rounded-3 text-center">
+                  <div class="fw-bold fs-3 text-warning" th:text="${totalRegistrations}">0</div>
+                  <div class="text-muted small">Registrations</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 bg-light rounded-3 text-center">
+                  <div class="fw-bold fs-3 text-info" th:text="${totalOrganizers}">0</div>
+                  <div class="text-muted small">Organizers</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Pending Events -->
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between">
+            <h6 class="fw-bold mb-0">
+              <i class="bi bi-hourglass-split me-2 text-warning"></i>Pending Approvals
+            </h6>
+            <a href="/admin/events/pending" class="btn btn-sm btn-warning fw-semibold">Review All</a>
+          </div>
+          <div class="card-body px-4 pb-4">
+            <div th:if="${#lists.isEmpty(pendingEventsList)}" class="text-center py-3 text-muted small">
+              <i class="bi bi-check-all fs-3 text-success"></i>
+              <p class="mt-1 mb-0">All caught up! No pending events.</p>
+            </div>
+            <div th:each="ev : ${pendingEventsList}"
+                 class="d-flex align-items-center gap-3 p-3 rounded-3 bg-light mb-2">
+              <div class="flex-grow-1">
+                <div class="fw-semibold small" th:text="${ev.title}">Title</div>
+                <div class="text-muted" style="font-size:.75rem">
+                  by <span th:text="${ev.organizer.name}">Organizer</span>
+                  &nbsp;·&nbsp;
+                  <span th:text="${#temporals.format(ev.eventDate,'dd MMM yyyy')}">Date</span>
+                </div>
+              </div>
+              <div class="d-flex gap-1">
+                <form th:action="'/admin/events/' + ${ev.id} + '/approve'" method="post">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                  <button type="submit" class="btn btn-sm btn-success">
+                    <i class="bi bi-check-lg"></i>
+                  </button>
+                </form>
+                <button class="btn btn-sm btn-outline-danger"
+                        data-bs-toggle="modal"
+                        th:data-event-id="${ev.id}"
+                        th:data-event-title="${ev.title}"
+                        onclick="openRejectModal(this)">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Users -->
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between">
+            <h6 class="fw-bold mb-0">
+              <i class="bi bi-person-plus me-2 text-primary"></i>Recent Users
+            </h6>
+            <a href="/admin/users" class="btn btn-sm btn-outline-primary">Manage All</a>
+          </div>
+          <div class="card-body px-4 pb-4">
+            <div th:each="u : ${recentUsers}"
+                 class="d-flex align-items-center gap-3 py-2 border-bottom">
+              <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+                   style="width:36px;height:36px;font-size:.85rem"
+                   th:style="${'width:36px;height:36px;font-size:.85rem;background:' + (#strings.equals(u.role.name(),'STUDENT') ? '#6C63FF' : (#strings.equals(u.role.name(),'ORGANIZER') ? '#3D35A0' : '#f5576c'))}"
+                   th:text="${#strings.substring(u.name,0,1).toUpperCase()}">A</div>
+              <div class="flex-grow-1 min-w-0">
+                <div class="fw-semibold small text-truncate" th:text="${u.name}">Name</div>
+                <div class="text-muted" style="font-size:.72rem" th:text="${u.email}">email</div>
+              </div>
+              <span class="badge badge-sm"
+                    th:classappend="${u.role.name()=='STUDENT' ? 'bg-primary' : (u.role.name()=='ORGANIZER' ? 'bg-success' : 'bg-danger')}"
+                    th:text="${u.role.name()}">Role</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold text-danger"><i class="bi bi-x-circle me-2"></i>Reject Event</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="rejectForm" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <div class="modal-body px-4">
+          <p class="text-muted small">Rejecting: <strong id="rejectEventTitle"></strong></p>
+          <label class="form-label fw-semibold">Reason for Rejection *</label>
+          <textarea name="reason" class="form-control" rows="4"
+                    placeholder="Explain why this event is being rejected..." required></textarea>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger fw-bold">
+            <i class="bi bi-x-circle me-1"></i>Reject Event
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<div th:replace="~{fragments/navbar :: chatbot}"></div>
+<script th:replace="~{fragments/navbar :: sidebarJs}"></script>
+<script>
+function openRejectModal(btn) {
+  const id = btn.getAttribute('data-event-id');
+  const title = btn.getAttribute('data-event-title');
+  document.getElementById('rejectEventTitle').textContent = title;
+  document.getElementById('rejectForm').action = '/admin/events/' + id + '/reject';
+  new bootstrap.Modal(document.getElementById('rejectModal')).show();
+}
+
+// Event Status Doughnut Chart
+const ctx = document.getElementById('eventStatusChart');
+if (ctx) {
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Pending', 'Approved', 'Completed', 'Rejected', 'Cancelled'],
+      datasets: [{
+        data: [
+          [[${pendingEvents}]],
+          [[${approvedEvents}]],
+          [[${completedEvents}]],
+          [[${rejectedEvents}]],
+          [[${cancelledEvents}]]
+        ],
+        backgroundColor: ['#ffc107','#28a745','#6C63FF','#dc3545','#6c757d'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 16, font: { size: 12 } } }
+      },
+      cutout: '55%'
+    }
+  });
+}
+</script>
+</body>
+</html>

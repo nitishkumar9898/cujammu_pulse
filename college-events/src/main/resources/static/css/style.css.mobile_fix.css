@@ -1,0 +1,21 @@
+/* ── Mobile Ticket / QR Fix ── */
+@media (max-width: 480px) {
+  .ticket-card {
+    max-width: 100%;
+    border-radius: 12px;
+  }
+  .ticket-header {
+    padding: 16px;
+    border-radius: 12px 12px 0 0;
+  }
+  .ticket-header h4 { font-size: 1.1rem; }
+  .ticket-body {
+    padding: 16px;
+  }
+  .ticket-body .qr-wrapper img {
+    width: 100%;
+    max-width: 220px;
+    height: auto;
+  }
+  .page-content { padding: 12px; }
+}

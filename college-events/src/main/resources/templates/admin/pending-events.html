@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pending Events — CUJAMMU EVENTHUB</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: adminSidebar(activePage='pending')}"></div>
+<div class="main-content">
+  <div th:replace="~{fragments/navbar :: topNav('Pending Event Approvals')}"></div>
+  <div class="page-content fade-in">
+    <div th:replace="~{fragments/navbar :: alerts}"></div>
+
+    <div th:if="${#lists.isEmpty(events)}" class="text-center py-5">
+      <i class="bi bi-check-circle display-1 text-success"></i>
+      <h4 class="mt-3 fw-bold">All caught up!</h4>
+      <p class="text-muted">No events pending review.</p>
+      <a href="/admin/dashboard" class="btn btn-primary">Back to Dashboard</a>
+    </div>
+
+    <div class="row g-4" th:unless="${#lists.isEmpty(events)}">
+      <div class="col-lg-6" th:each="ev : ${events}">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+          <!-- Banner -->
+          <div class="position-relative">
+            <img th:if="${ev.bannerImage != null}" th:src="'/uploads/' + ${ev.bannerImage}"
+                 class="w-100" style="height:160px;object-fit:cover" alt="Banner"/>
+            <div th:unless="${ev.bannerImage != null}"
+                 class="d-flex align-items-center justify-content-center"
+                 style="height:100px;background:linear-gradient(135deg,#f093fb22,#f5576c22)">
+              <i class="bi bi-calendar-event text-muted" style="font-size:2.5rem;opacity:.3"></i>
+            </div>
+            <span class="position-absolute top-0 end-0 m-2 badge bg-warning text-dark">PENDING REVIEW</span>
+          </div>
+
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h6 class="fw-bold mb-0" th:text="${ev.title}">Title</h6>
+              <span th:if="${ev.fees > 0}" class="badge bg-warning text-dark"
+                    th:text="'₹' + ${ev.fees}">Fee</span>
+              <span th:unless="${ev.fees > 0}" class="badge bg-success">FREE</span>
+            </div>
+
+            <p class="text-muted small mb-3"
+               th:text="${#strings.abbreviate(ev.description, 120)}">Desc</p>
+
+            <div class="row g-2 mb-3 small text-muted">
+              <div class="col-6">
+                <i class="bi bi-calendar3 me-1 text-primary"></i>
+                <span th:text="${#temporals.format(ev.eventDate,'dd MMM yyyy')}">Date</span>
+              </div>
+              <div class="col-6">
+                <i class="bi bi-clock me-1 text-info"></i>
+                <span th:text="${#temporals.format(ev.eventDate,'hh:mm a')}">Time</span>
+              </div>
+              <div class="col-6">
+                <i class="bi bi-geo-alt me-1 text-danger"></i>
+                <span th:text="${ev.venue}">Venue</span>
+              </div>
+              <div class="col-6">
+                <i class="bi bi-people me-1 text-success"></i>
+                <span th:text="${ev.maxSeats} + ' seats'">Seats</span>
+              </div>
+              <div class="col-12">
+                <i class="bi bi-person-workspace me-1 text-secondary"></i>
+                <span th:text="${ev.organizer.name} + ' (' + ${ev.organizer.department} + ')'">Organizer</span>
+              </div>
+              <div class="col-12">
+                <i class="bi bi-tag me-1"></i>
+                <span th:text="${ev.category?.name ?: 'Uncategorized'}">Category</span>
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="d-flex gap-2">
+              <form th:action="'/admin/events/' + ${ev.id} + '/approve'" method="post" class="flex-grow-1">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="btn btn-success fw-bold w-100">
+                  <i class="bi bi-check-circle me-1"></i>Approve
+                </button>
+              </form>
+              <button class="btn btn-outline-danger fw-semibold px-4"
+                      data-bs-toggle="modal" data-bs-target="#rejectModal"
+                      th:data-event-id="${ev.id}"
+                      th:data-event-title="${ev.title}"
+                      onclick="openRejectModal(this)">
+                <i class="bi bi-x-circle me-1"></i>Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold text-danger"><i class="bi bi-x-circle me-2"></i>Reject Event</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="rejectForm" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <div class="modal-body px-4">
+          <p class="text-muted small mb-3">Event: <strong id="rejectTitle"></strong></p>
+          <label class="form-label fw-semibold">Reason for Rejection *</label>
+          <textarea name="reason" class="form-control" rows="4"
+                    placeholder="Provide a clear reason so the organizer can revise and resubmit..." required></textarea>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger fw-bold">
+            <i class="bi bi-x-circle me-1"></i>Reject Event
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:replace="~{fragments/navbar :: sidebarJs}"></script>
+<script>
+function openRejectModal(btn) {
+  document.getElementById('rejectTitle').textContent = btn.getAttribute('data-event-title');
+  document.getElementById('rejectForm').action = '/admin/events/' + btn.getAttribute('data-event-id') + '/reject';
+}
+</script>
+</body>
+</html>
