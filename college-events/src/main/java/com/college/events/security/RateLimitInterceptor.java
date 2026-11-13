@@ -5,65 +5,31 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import java.time.Duration;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.web.servlet.HandlerMapping;
 
 @Component
 @SuppressWarnings("null")
 public class RateLimitInterceptor implements HandlerInterceptor {
 
-    private final Map<String, UserRate> cache = new ConcurrentHashMap<>();
-    // Limits
-    private static final int MAX_AUTH_REQUESTS = 5; // Strict limit for auth
-    private static final int MAX_API_REQUESTS = 60; // Standard limit
-    private static final long TIME_WINDOW_MS = 60 * 1000; 
+    private final Cache<String, AtomicInteger> counters = Caffeine.newBuilder()
+            .maximumSize(20000).expireAfterWrite(Duration.ofMinutes(1)).build();
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String clientIp = request.getRemoteAddr();
-        String path = request.getRequestURI();
-        if (clientIp == null) {
-            clientIp = "unknown";
-        }
-        
-        // Use a composite key to rate limit per path per IP
-        String cacheKey = clientIp + "_" + path;
-        
-        long currentTime = System.currentTimeMillis();
-
-        cache.compute(cacheKey, (key, rate) -> {
-            if (rate == null || (currentTime - rate.startTime) > TIME_WINDOW_MS) {
-                return new UserRate(currentTime, 1);
-            }
-            rate.requestCount++;
-            return rate;
-        });
-
-        UserRate rate = cache.get(cacheKey);
-        
-        // Determine limit based on path
-        int limit = isAuthPath(path) ? MAX_AUTH_REQUESTS : MAX_API_REQUESTS;
-
-        if (rate.requestCount > limit) {
-            response.setStatus(429); // HTTP 429 Too Many Requests
-            response.getWriter().write("429 Too Many Requests - Rate Limit Exceeded. Please try again later.");
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean isAuthPath(String path) {
-        return path.contains("/login") || path.contains("/register") || path.contains("/forgot-password") || path.contains("/otp");
-    }
-
-    private static class UserRate {
-        long startTime;
-        int requestCount;
-
-        UserRate(long startTime, int requestCount) {
-            this.startTime = startTime;
-            this.requestCount = requestCount;
-        }
+        String actor = request.getUserPrincipal() == null ? "peer:" + request.getRemoteAddr()
+                : "account:" + request.getUserPrincipal().getName();
+        Object route = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+        String key = actor + ":" + (route == null ? "api" : route.toString());
+        int limit = request.getRequestURI() != null && request.getRequestURI().endsWith("/attendance/manual-entry") ? 20 : 120;
+        if (counters.get(key, ignored -> new AtomicInteger()).incrementAndGet() <= limit) return true;
+        response.setStatus(429);
+        response.setHeader("Retry-After", "60");
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\":\"RATE_LIMIT_EXCEEDED\"}");
+        return false;
     }
 }

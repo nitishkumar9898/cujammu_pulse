@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.UUID;
+import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
@@ -47,16 +47,21 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public User registerUser(UserRegistrationDto dto) {
-        if (userRepository.existsByEmail(dto.getEmail())) {
+        if (!isPublicRegistrationRole(dto.getRole())) {
+            throw new IllegalArgumentException("This role requires authorized university provisioning.");
+        }
+        String email = dto.getEmail().trim().toLowerCase(Locale.ROOT);
+        if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email already registered: " + dto.getEmail());
         }
         if (!dto.isPasswordMatching()) {
             throw new IllegalArgumentException("Passwords do not match");
         }
+        PasswordPolicy.validate(dto.getPassword());
 
         User user = User.builder()
             .name(normalizeText(dto.getName()))
-            .email(dto.getEmail().toLowerCase().trim())
+            .email(email)
             .password(passwordEncoder.encode(dto.getPassword()))
             .role(dto.getRole())
             .department(normalizeText(dto.getDepartment()))
@@ -68,6 +73,10 @@ public class UserService implements UserDetailsService {
         User saved = userRepository.save(user);
         log.info("Registered new user: {} as {}", saved.getEmail(), saved.getRole());
         return saved;
+    }
+
+    public static boolean isPublicRegistrationRole(Role role) {
+        return role == Role.STUDENT || role == Role.ALUMNI;
     }
 
     public Optional<User> findByEmail(String email) {
@@ -150,11 +159,11 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void changePassword(User user, String newPassword) {
-        User existingUser = userRepository.findById(user.getId())
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        existingUser.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(existingUser);
-        log.info("Password changed for user: {}", existingUser.getEmail());
+        PasswordPolicy.validate(newPassword);
+        if (userRepository.replacePasswordAndRevokeReset(user.getId(), user.getPassword(), passwordEncoder.encode(newPassword)) != 1) {
+            throw new IllegalArgumentException("Account is unavailable.");
+        }
+        log.info("Password changed for account id={}", user.getId());
     }
 
     public boolean checkPassword(User user, String rawPassword) {
@@ -196,22 +205,18 @@ public class UserService implements UserDetailsService {
 
     /**
      * Generates a password reset token for the given email.
-     * Returns the token (for logging/display), or null if email not found.
+     * Returns the bearer token for owner delivery only; never log or persist the raw value.
      */
     @Transactional
     public String generatePasswordResetToken(String email) {
-        Optional<User> userOpt = userRepository.findByEmail(email.toLowerCase().trim());
-        if (userOpt.isEmpty()) {
-            // Don't reveal email existence - still return a value
-            log.warn("Password reset requested for non-existent email: {}", email);
-            return null;
-        }
+        if (email == null) return null;
+        Optional<User> userOpt = findByEmail(email).filter(User::isEnabled);
+        if (userOpt.isEmpty()) return null;
         User user = userOpt.get();
-        String token = UUID.randomUUID().toString();
-        user.setPasswordResetToken(token);
-        user.setPasswordResetTokenExpiry(LocalDateTime.now().plusMinutes(30));
-        userRepository.save(user);
-        log.info("Password reset token generated for user: {} | Token: {}", email, token);
+        String token = PasswordResetTokens.generate();
+        if (userRepository.issuePasswordReset(user.getId(), PasswordResetTokens.digest(token),
+                LocalDateTime.now(ZoneOffset.UTC).plusMinutes(30)) != 1) return null;
+        log.info("Password reset token issued for account id={}", user.getId());
         return token;
     }
 
@@ -220,10 +225,11 @@ public class UserService implements UserDetailsService {
      * Returns the User if token is valid and not expired, else empty.
      */
     public Optional<User> validatePasswordResetToken(String token) {
-        if (token == null || token.isBlank()) return Optional.empty();
-        return userRepository.findByPasswordResetToken(token)
-            .filter(u -> u.getPasswordResetTokenExpiry() != null
-                      && u.getPasswordResetTokenExpiry().isAfter(LocalDateTime.now()));
+        String digest = PasswordResetTokens.digest(token);
+        if (digest == null) return Optional.empty();
+        return userRepository.findByPasswordResetToken(digest)
+            .filter(u -> u.isEnabled() && u.getPasswordResetTokenExpiry() != null
+                      && u.getPasswordResetTokenExpiry().isAfter(LocalDateTime.now(ZoneOffset.UTC)));
     }
 
     /**
@@ -232,18 +238,13 @@ public class UserService implements UserDetailsService {
      */
     @Transactional
     public boolean resetPasswordWithToken(String token, String newPassword) {
-        Optional<User> userOpt = validatePasswordResetToken(token);
-        if (userOpt.isEmpty()) {
-            log.warn("Invalid or expired password reset token used: {}", token);
-            return false;
-        }
-        User user = userOpt.get();
-        user.setPassword(passwordEncoder.encode(newPassword));
-        user.setPasswordResetToken(null);
-        user.setPasswordResetTokenExpiry(null);
-        userRepository.save(user);
-        log.info("Password successfully reset for user: {}", user.getEmail());
-        return true;
+        PasswordPolicy.validate(newPassword);
+        String digest = PasswordResetTokens.digest(token);
+        if (digest == null) return false;
+        // Password replacement and credential consumption are one conditional database write.
+        // Expiry is checked after encoding so slow hashing cannot extend the acceptance window.
+        String encoded = passwordEncoder.encode(newPassword);
+        return userRepository.consumePasswordReset(digest, LocalDateTime.now(ZoneOffset.UTC), encoded) == 1;
     }
 
     private String normalizeText(String value) {

@@ -25,6 +25,8 @@ public class AdminController {
     private final RegistrationService registrationService;
     private final CategoryService categoryService;
     private final CsvExportService csvExportService;
+    private final com.college.events.service.FeatureFlagService featureFlagService;
+    private final com.college.events.service.AcademicAuthorityService academicAuthorityService;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -45,6 +47,60 @@ public class AdminController {
                 .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
                 .limit(5).toList());
         return "admin/dashboard";
+    }
+
+    @GetMapping("/features")
+    public String featureFlags(Model model) {
+        model.addAttribute("flags", featureFlagService.getAllFlags());
+        return "admin/features";
+    }
+
+    @GetMapping("/academic-access")
+    public String academicAccess(Model model) {
+        model.addAttribute("grants", academicAuthorityService.activeGrants());
+        model.addAttribute("departments", academicAuthorityService.activeDepartments());
+        model.addAttribute("candidates", userService.findAll().stream()
+                .filter(User::isEnabled)
+                .filter(user -> user.getRole() == Role.STAFF || user.getRole() == Role.FACULTY || user.getRole() == Role.ORGANIZER)
+                .toList());
+        model.addAttribute("capabilities", com.college.events.service.AcademicAuthorityService.Capability.values());
+        return "admin/academic-access";
+    }
+
+    @PostMapping("/academic-access/grant")
+    public String grantAcademicAccess(@RequestParam Long userId, @RequestParam String departmentName,
+                                      @RequestParam String capability, RedirectAttributes ra) {
+        try {
+            academicAuthorityService.grant(userId, departmentName,
+                    com.college.events.service.AcademicAuthorityService.Capability.valueOf(capability));
+            ra.addFlashAttribute("successMsg", "Academic access granted for the selected department.");
+        } catch (IllegalArgumentException failure) {
+            ra.addFlashAttribute("errorMsg", "The selected academic access request is invalid.");
+        }
+        return "redirect:/admin/academic-access";
+    }
+
+    @PostMapping("/academic-access/{grantId}/revoke")
+    public String revokeAcademicAccess(@PathVariable Long grantId, RedirectAttributes ra) {
+        academicAuthorityService.revoke(grantId);
+        ra.addFlashAttribute("successMsg", "Academic access revoked.");
+        return "redirect:/admin/academic-access";
+    }
+
+    @PostMapping("/features/toggle")
+    public String toggleFeature(@RequestParam String key,
+                                @RequestParam boolean enabled,
+                                @RequestParam long expectedRevision,
+                                @RequestParam String reason,
+                                @AuthenticationPrincipal User admin,
+                                RedirectAttributes ra) {
+        try {
+            featureFlagService.setFeatureEnabled(key, enabled, expectedRevision, reason);
+            ra.addFlashAttribute("successMsg", "Feature switch '" + key + "' successfully updated to " + (enabled ? "ENABLED" : "DISABLED") + ".");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            ra.addFlashAttribute("errorMsg", e.getMessage());
+        }
+        return "redirect:/admin/features";
     }
 
     // ─── EVENTS ─────────────────────────────────────────────────────────
@@ -73,12 +129,22 @@ public class AdminController {
         return "admin/pending-events";
     }
 
+    @GetMapping("/events/publication-queue")
+    public String approvedUnpublishedEvents(@RequestParam(defaultValue = "0") int page, Model model) {
+        var result = eventService.findApprovedUnpublished(page);
+        model.addAttribute("events", result.getContent());
+        model.addAttribute("page", page);
+        model.addAttribute("hasNext", result.hasNext());
+        return "admin/publication-queue";
+    }
+
     @GetMapping("/events/{id}")
     public String viewEvent(@PathVariable Long id, Model model) {
         Event event = eventService.findById(id)
             .orElseThrow(() -> new RuntimeException("Event not found"));
         List<Registration> registrations = registrationService.findByEvent(event);
         model.addAttribute("event", event);
+        model.addAttribute("canReviewProposal", eventService.canReviewProposal(id));
         model.addAttribute("registrations", registrations);
         model.addAttribute("confirmedCount", registrationService.countConfirmed(event));
         model.addAttribute("waitlistedCount", registrationService.countWaitlisted(event));
@@ -86,12 +152,13 @@ public class AdminController {
     }
 
     @PostMapping("/events/{id}/approve")
-    public String approveEvent(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String approveEvent(@PathVariable Long id, @RequestParam long expectedRevision, RedirectAttributes redirectAttributes) {
         try {
-            eventService.approveEvent(id);
-            redirectAttributes.addFlashAttribute("successMsg", "✅ Event approved successfully.");
+            eventService.approveEvent(id, expectedRevision);
+            redirectAttributes.addFlashAttribute("successMsg", "✅ Proposal approved; event remains private until publication.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());
+            if (e instanceof org.springframework.security.access.AccessDeniedException denied) throw denied;
+            redirectAttributes.addFlashAttribute("errorMsg", "Review decision could not be applied. Reload the proposal and check its current state.");
         }
         return "redirect:/admin/events/pending";
     }
@@ -99,14 +166,28 @@ public class AdminController {
     @PostMapping("/events/{id}/reject")
     public String rejectEvent(@PathVariable Long id,
                               @RequestParam String reason,
+                              @RequestParam long expectedRevision,
                               RedirectAttributes redirectAttributes) {
         try {
-            eventService.rejectEvent(id, reason);
+            eventService.rejectEvent(id, reason, expectedRevision);
             redirectAttributes.addFlashAttribute("successMsg", "Event rejected with reason noted.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());
+            if (e instanceof org.springframework.security.access.AccessDeniedException denied) throw denied;
+            redirectAttributes.addFlashAttribute("errorMsg", "Review decision could not be applied. Reload the proposal and check its current state.");
         }
         return "redirect:/admin/events/pending";
+    }
+
+    @PostMapping("/events/{id}/publish")
+    public String publishEvent(@PathVariable Long id, @RequestParam long expectedRevision, RedirectAttributes redirectAttributes) {
+        try {
+            eventService.publishApprovedEvent(id, expectedRevision);
+            redirectAttributes.addFlashAttribute("successMsg", "Event published; public discovery and approved notices are now enabled.");
+        } catch (Exception e) {
+            if (e instanceof org.springframework.security.access.AccessDeniedException denied) throw denied;
+            redirectAttributes.addFlashAttribute("errorMsg", "Publication could not be applied. Reload the queue and verify the current state.");
+        }
+        return "redirect:/admin/events/publication-queue";
     }
 
     @PostMapping("/events/{id}/delete")

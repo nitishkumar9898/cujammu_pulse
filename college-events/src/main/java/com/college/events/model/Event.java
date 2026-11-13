@@ -21,6 +21,24 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Monotonic persisted revision used to reject notices from an earlier event state. */
+    @Version
+    @Column(nullable = false)
+    @Builder.Default
+    private long lifecycleVersion = 0L;
+    /** Proposal decision input revision, used only for exact no-write decision replay. */
+    private Long lastProposalDecisionRevision;
+    /** Proposal publication input revision, used only for exact no-write publish retries. */
+    private Long lastPublicationDecisionRevision;
+    private LocalDateTime publishedAt;
+    private Long publishedByUserId;
+    private LocalDateTime proposalSubmittedAt;
+    /** Explicit private review assignment. Null legacy assignments never confer decision authority. */
+    private Long assignedReviewerId;
+    private Long reviewerAssignedByUserId;
+    private LocalDateTime reviewerAssignedAt;
+    private Long lastReviewerAssignmentRevision;
+
     @Column(nullable = false)
     private String title;
 
@@ -40,6 +58,9 @@ public class Event {
 
     @Column(nullable = false)
     private LocalDateTime eventDate;
+
+    /** Explicit campus-local finish time. Null means unknown, never an inferred duration. */
+    private LocalDateTime eventEndsAt;
 
     @Column(nullable = false)
     private Integer maxSeats;
@@ -81,11 +102,46 @@ public class Event {
 
     private String certificateTemplatePath;
 
+    @Column(length = 30)
+    @Builder.Default
+    private String eventScope = "WHOLE_UNIVERSITY"; // DEPARTMENT, INTER_DEPARTMENT, HOSTEL, CLUB, WHOLE_UNIVERSITY, INTER_COLLEGE
+
+    @Column(length = 20)
+    @Builder.Default
+    private String targetDegree = "ALL"; // ALL, UG, PG, PHD
+
+    @Column(length = 20)
+    @Builder.Default
+    private String targetYear = "ALL"; // ALL, 1ST, 2ND, 3RD, 4TH
+
+    private String targetSemester;
+
+    @Builder.Default
+    private boolean allowOtherDepartments = true;
+
+    @Column(length = 30)
+    @Builder.Default
+    private String approvalPolicy = "MANUAL_REVIEW"; // MANUAL_REVIEW, AUTO_APPROVE
+
+    @Column(length = 30)
+    @Builder.Default
+    private String attendanceMode = "DUAL_QR"; // DUAL_QR, SINGLE_QR, MANUAL, NONE
+
+    @Column(length = 64)
+    private String exitQrToken;
+
+    @Builder.Default
+    private int minDwellTimePercent = 80;
+
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
     private LocalDateTime approvedAt;
+    /** Explicit manager closure provenance; legacy auto-completed rows remain unverified. */
+    private LocalDateTime completedAt;
+    private Long completedByUserId;
 
     // Helper methods
     public boolean isUpcoming() {

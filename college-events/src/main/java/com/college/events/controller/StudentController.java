@@ -1,7 +1,6 @@
 package com.college.events.controller;
 
 import com.college.events.model.*;
-import com.college.events.repository.CertificateRepository;
 import com.college.events.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,12 +23,15 @@ public class StudentController {
     private final EventService eventService;
     private final RegistrationService registrationService;
     private final CategoryService categoryService;
-    private final QRService qrService;
     private final UserService userService;
     private final FeedbackService feedbackService;
     private final SpeakerService speakerService;
     private final SponsorService sponsorService;
-    private final CertificateRepository certificateRepository;
+    private final PointCertificateIssuanceService certificateIssuance;
+    private final com.college.events.service.DynamicFormService dynamicFormService;
+    private final com.college.events.service.CoEAcademicService coEAcademicService;
+    private final com.college.events.service.SupportHelpdeskService supportHelpdeskService;
+    private final FeatureFlagService featureFlagService;
 
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal User user, Model model) {
@@ -104,7 +106,7 @@ public class StudentController {
             Registration reg = registrationService.register(user, id);
             if (reg.getStatus() == RegistrationStatus.REGISTERED) {
                 redirectAttributes.addFlashAttribute("successMsg",
-                    "🎉 Successfully registered! Your QR ticket has been generated.");
+                    "Registration confirmed. Secure event-pass display is not enabled in this release.");
             } else {
                 redirectAttributes.addFlashAttribute("warningMsg",
                     "⏳ Event is full. You've been added to the waitlist.");
@@ -128,20 +130,9 @@ public class StudentController {
     }
 
     @GetMapping("/ticket/{registrationId}")
-    public String viewTicket(@PathVariable Long registrationId,
-                             @AuthenticationPrincipal User user,
-                             Model model) {
-        Registration reg = registrationService.findById(registrationId)
-            .orElseThrow(() -> new RuntimeException("Registration not found"));
-
-        if (!reg.getUser().getId().equals(user.getId())) {
-            return "redirect:/student/my-tickets";
-        }
-
-        String qrDataUri = qrService.getQrImageDataUri(reg.getQrToken());
-        model.addAttribute("registration", reg);
-        model.addAttribute("qrDataUri", qrDataUri);
-        return "student/ticket";
+    public String viewTicket(RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("warningMsg", "Legacy QR tickets are disabled. No event pass was exposed.");
+        return "redirect:/student/my-tickets";
     }
 
     @PostMapping("/registrations/{id}/cancel")
@@ -233,6 +224,7 @@ public class StudentController {
                                  @RequestParam String currentPassword,
                                  @RequestParam String newPassword,
                                  @RequestParam String confirmNewPassword,
+                                 jakarta.servlet.http.HttpSession session,
                                  RedirectAttributes redirectAttributes) {
         if (!userService.checkPassword(user, currentPassword)) {
             redirectAttributes.addFlashAttribute("errorMsg", "Current password is incorrect.");
@@ -242,40 +234,62 @@ public class StudentController {
             redirectAttributes.addFlashAttribute("errorMsg", "New passwords do not match.");
             return "redirect:/student/profile";
         }
-        if (newPassword.length() < 8) {
-            redirectAttributes.addFlashAttribute("errorMsg", "Password must be at least 8 characters.");
+        try {
+            userService.changePassword(user, newPassword);
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());
             return "redirect:/student/profile";
         }
-        userService.changePassword(user, newPassword);
-        redirectAttributes.addFlashAttribute("successMsg", "Password changed successfully!");
-        return "redirect:/student/profile";
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        session.invalidate();
+        return "redirect:/login?passwordChanged=true";
     }
 
     @GetMapping("/certificates")
-    public String viewCertificates(@AuthenticationPrincipal User user, Model model) {
-        // Ensure all attended events have certificate entities (lazy creation)
-        List<Registration> attended = registrationService.findByUser(user).stream()
-            .filter(r -> r.getStatus() == RegistrationStatus.ATTENDED)
-            .toList();
-        
-        for (Registration reg : attended) {
-            if (!certificateRepository.existsByRegistration(reg)) {
-                String certNo = "CUJ-" + reg.getEvent().getId() + "-" + reg.getId() + "-" + (System.currentTimeMillis() % 1000);
-                Certificate cert = Certificate.builder()
-                    .registration(reg)
-                    .event(reg.getEvent())
-                    .user(user)
-                    .certificateNumber(certNo)
-                    .templateId("DEFAULT")
-                    .build();
-                if (cert != null) {
-                    certificateRepository.save(cert);
-                }
-            }
-        }
-        
-        model.addAttribute("certificates", certificateRepository.findByUserOrderByIssuedAtDesc(user));
+    public String viewCertificates(@AuthenticationPrincipal User user, @RequestParam(defaultValue = "0") int page, Model model) {
+        var certificates = certificateIssuance.ownPage(page);
+        model.addAttribute("certificates", certificates.getContent());
+        model.addAttribute("certificatePage", page);
+        model.addAttribute("certificateHasNext", certificates.hasNext());
         model.addAttribute("activePage", "certificates");
         return "student/certificates";
+    }
+
+    @GetMapping("/events/{id}/custom-register")
+    public String customEventRegister(@PathVariable Long id,
+                                      @AuthenticationPrincipal User user,
+                                      Model model) {
+        Event event = eventService.findById(id).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        var schema = dynamicFormService.getFormSchema(id);
+        var existingResp = dynamicFormService.getUserResponse(id, user.getId());
+
+        model.addAttribute("event", event);
+        model.addAttribute("user", user);
+        model.addAttribute("schema", schema);
+        model.addAttribute("existingResponse", existingResp.orElse(null));
+        model.addAttribute("activePage", "events");
+        return "student/custom-register";
+    }
+
+    @GetMapping("/dashboard-360")
+    public String comprehensive360Dashboard(@AuthenticationPrincipal User user, Model model) {
+        List<Registration> registrations = registrationService.findByUser(user);
+        var certificates = featureFlagService.isEnabled("MODULE_CERTIFICATES") && featureFlagService.isEnabled("MODULE_EVENTS")
+                ? certificateIssuance.ownCertificates() : List.<Certificate>of();
+        var scorecards = coEAcademicService.getMyScoreCards();
+        var tickets = featureFlagService.isFeatureEnabled("MODULE_HELPDESK") ? supportHelpdeskService.ownTickets(0).items() : List.of();
+
+        long attended = registrations.stream().filter(r -> r.getStatus() == RegistrationStatus.ATTENDED).count();
+        long upcoming = registrations.stream().filter(r -> r.getStatus() == RegistrationStatus.REGISTERED && r.getEvent().isUpcoming()).count();
+
+        model.addAttribute("user", user);
+        model.addAttribute("registrations", registrations);
+        model.addAttribute("attendedCount", attended);
+        model.addAttribute("upcomingCount", upcoming);
+        model.addAttribute("certificates", certificates);
+        model.addAttribute("scorecards", scorecards);
+        model.addAttribute("tickets", tickets);
+        model.addAttribute("activePage", "dashboard-360");
+        return "student/dashboard-360";
     }
 }

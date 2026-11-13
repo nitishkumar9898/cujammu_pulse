@@ -1,3 +1,5 @@
+> **Status (19 October 2026): legacy guide only.** Do not follow these steps for production or place real university data/secrets into this setup. This guide contains superseded H2/PostgreSQL/MySQL deployment examples. The documented architecture target is MongoDB replica-set transactions, while the current backend still uses a JPA relational bridge; the target database migration and production acceptance are not complete. For the isolated synthetic professor review, use [the current local runbook](../PROFESSOR_DEMO.md). For current verified gaps and release gates, see [the implementation matrix](../CURRENT_IMPLEMENTATION_MATRIX_2026-10-18.md).
+
 # CUJAMMU EVENTHUB — Setup & Deployment Guide
 
 ## 📋 Prerequisites
@@ -59,12 +61,11 @@ mvn spring-boot:run
 | http://localhost:8080 | Home page |
 | http://localhost:8080/login | Login |
 | http://localhost:8080/register | Register |
-| http://localhost:8080/h2-console | Database console (H2) |
+| http://localhost:8080/h2-console | Blocked by the current security configuration (403) |
 | http://localhost:8080/api/health | Health check API |
 
-### Default Admin Account
-- **Email:** `admin@college.com`
-- **Password:** `Admin@123`
+### Administrator access
+No shared administrator credential is shipped. Never use credentials from copied setup guides. For an isolated professor review, use the dedicated `professor-demo` profile and a unique local password; production administrators must be provisioned through the university-approved identity and access process with MFA.
 
 ---
 
@@ -153,7 +154,9 @@ git push -u origin main
    SPRING_MAIL_PASSWORD=your_app_password
    GEMINI_API_KEY=your_key
    APP_BASE_URL=https://your-app.up.railway.app
+   APP_RESET_LINK_HOSTS=your-app.up.railway.app
    ```
+   Password-reset email requires `APP_RESET_LINK_HOSTS` to contain the exact HTTPS hostname used by `APP_BASE_URL`. Keep it blank until the approved hostname is assigned; blank intentionally disables reset-link issuance and delivery.
 4. **Build command:** `mvn clean package -DskipTests`
 5. **Start command:** `java -jar target/events-1.0.0.jar`
 
@@ -187,6 +190,7 @@ export SPRING_MAIL_USERNAME=your_gmail@gmail.com
 export SPRING_MAIL_PASSWORD=your_app_password
 export GEMINI_API_KEY=your_key
 export APP_BASE_URL=https://your-domain.com
+export APP_RESET_LINK_HOSTS=your-domain.com
 
 nohup java -jar events-1.0.0.jar &
 ```
@@ -195,7 +199,7 @@ nohup java -jar events-1.0.0.jar &
 
 ```sql
 CREATE DATABASE college_events CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'eventhub'@'%' IDENTIFIED BY 'StrongPassword123!';
+CREATE USER 'eventhub'@'%' IDENTIFIED BY 'replace-with-a-unique-secret';
 GRANT ALL PRIVILEGES ON college_events.* TO 'eventhub'@'%';
 FLUSH PRIVILEGES;
 ```
@@ -205,7 +209,7 @@ Then update your environment:
 SPRING_PROFILES_ACTIVE=       # Remove H2 profile
 SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/college_events?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
 SPRING_DATASOURCE_USERNAME=eventhub
-SPRING_DATASOURCE_PASSWORD=StrongPassword123!
+SPRING_DATASOURCE_PASSWORD=replace-with-the-same-unique-secret
 ```
 
 ---

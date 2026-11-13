@@ -28,4 +28,7 @@ public class Speaker {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
     private Event event;
+
+    public String getSafeLinkedInUrl() { return com.college.events.security.WebUrlPolicy.safeHttpUrl(linkedInUrl); }
+    public String getSafeProfileImageUrl() { return com.college.events.security.WebUrlPolicy.safeHttpUrl(profileImageUrl); }
 }

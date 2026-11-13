@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8" />
+<style>@page { size: A4 landscape; margin: 18mm; } body { font-family: serif; color: #17233b; text-align: center; }
+.certificate { border: 3px solid #123149; padding: 9mm 10mm; } .university-seal { width: 20mm; height: 20mm; }
+.university-name { margin: 2mm 0 0; font-weight: 700; color: #123149; } h1 { font-size: 28pt; margin: 7mm 0; }
+.name { font-size: 22pt; } .note { font-size: 11pt; margin-top: 5mm; } .verify { font-size: 9pt; }</style>
+</head><body><div class="certificate">
+<img th:if="${universityLogoDataUri}" th:src="${universityLogoDataUri}" class="university-seal" alt="Central University of Jammu seal" />
+<p class="university-name">जम्मू केंद्रीय विश्वविद्यालय<br/>Central University of Jammu</p><h1>Verified Point Attendance</h1>
+<p class="name" th:text="${userName}">Participant</p>
+<p th:text="${enrollmentNo}">Verified identifier</p>
+<p>has fulfilled the published point-attendance evidence requirement for</p>
+<h2 th:text="${eventTitle}">Event</h2><p th:text="${eventDate}">Date</p>
+<p class="note">This certificate confirms verified presence under the published point-attendance policy. It does not certify attendance duration, academic credit or volunteer hours.</p>
+<p class="verify">Certificate: <span th:text="${certNo}">Reference</span><br />
+Verify: <span th:text="${verificationUrl}">Verification link</span></p>
+</div></body></html>

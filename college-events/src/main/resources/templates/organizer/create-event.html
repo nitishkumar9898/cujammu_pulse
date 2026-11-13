@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Create Event — CUJAMMU EVENTHUB</title>
+<title>Create Event — CUJAMMU PULSE</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 <link href="/css/style.css" rel="stylesheet"/>
@@ -61,10 +61,19 @@
             </div>
 
             <div class="col-md-6">
-              <label class="form-label fw-semibold">Event Date &amp; Time *</label>
+              <label class="form-label fw-semibold">Event Date &amp; Time (IST) *</label>
               <input type="datetime-local" th:field="*{eventDate}" class="form-control"
                      th:classappend="${#fields.hasErrors('eventDate')} ? 'is-invalid'" required aria-label="Event Date & Time"/>
               <div class="invalid-feedback" th:errors="*{eventDate}">Error</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="eventEndsAt">Event end time (optional, IST)</label>
+              <input type="datetime-local" th:field="*{eventEndsAt}" class="form-control"
+                     th:classappend="${#fields.hasErrors('eventEndsAt') or #fields.hasErrors('eventIntervalValid')} ? 'is-invalid'"/>
+              <div class="form-text">Enter the planned finish time for accurate calendar clash checks. Leave blank when it is unknown.</div>
+              <div class="invalid-feedback" th:errors="*{eventEndsAt}">Error</div>
+              <div class="invalid-feedback" th:errors="*{eventIntervalValid}">Error</div>
             </div>
 
             <div class="col-md-3">

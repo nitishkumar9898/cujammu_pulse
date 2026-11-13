@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="_csrf" th:content="${_csrf.token}"><meta name="_csrf_header" th:content="${_csrf.headerName}">
+  <title>Alumni connections | CUJAMMU-PULSE</title>
+  <style>
+    :root { color-scheme: light dark; --bg:#f3f6fb; --card:#fff; --ink:#18283f; --line:#cad4e2; --accent:#214f85 }
+    @media(prefers-color-scheme:dark){:root{--bg:#101a28;--card:#1b2a3d;--ink:#edf3fd;--line:#53657e;--accent:#8dc4ff}}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,sans-serif}
+    main,header{max-width:1120px;margin:auto;padding:24px}header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    header img{width:42px;height:42px;border-radius:50%}a{color:var(--accent)}h1{font-size:clamp(2rem,4vw,3rem);line-height:1.15}
+    nav{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}.card,form.panel{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 10px 35px #13274408}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:16px}.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:16px}
+    label{display:block;margin:10px 0}input:not([type=checkbox]),select,textarea{display:block;width:100%;border:1px solid var(--line);border-radius:9px;padding:12px;font:inherit;background:var(--bg);color:var(--ink)}
+    input[type=checkbox]{width:20px;height:20px;vertical-align:middle;margin-right:8px}button,.button{font:inherit;padding:10px 17px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);cursor:pointer;min-height:44px;text-decoration:none}
+    button:hover{border-color:var(--accent)}button:disabled{opacity:.6;cursor:wait}:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .primary{background:#214f85;color:#fff}.muted{opacity:.8}.toolbar{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin:20px 0}.toolbar label{flex:1;min-width:200px}
+    [hidden]{display:none!important}.notice{padding:12px;border-left:4px solid var(--accent);margin:16px 0}fieldset{border:1px solid var(--line);border-radius:12px;margin:18px 0}article h3{margin-top:0}.pager{margin:18px 0}
+    @media(prefers-reduced-motion:no-preference){.card{animation:appear .2s ease-out}@keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}}
+  </style>
+</head>
+<body>
+<header><img src="/images/cujammu_logo_circle.png" alt="CUJammu"><strong>CUJAMMU-PULSE</strong><a href="/">University home</a><a href="/notifications">Notifications</a></header>
+<main>
+  <p class="muted">COMMUNITY / ALUMNI</p><h1>Connections that continue.</h1>
+  <p>Discover verified graduates, explore career opportunities and choose what you share. Your profile stays private until you opt in and the university verifies your membership.</p>
+  <nav aria-label="Alumni sections">
+    <button type="button" data-section="directory">Directory</button><button type="button" data-section="profile">My profile</button>
+    <button type="button" data-section="jobs">Opportunities</button><button type="button" data-section="review" th:if="${canVerify}">Verification desk</button>
+  </nav>
+  <p id="notice" class="notice" role="status" aria-live="polite" hidden></p>
+  <section id="directorySection" aria-labelledby="directoryTitle"><h2 id="directoryTitle">Alumni directory</h2>
+    <form id="directoryFilter" class="toolbar"><label>Department<input name="department" maxlength="80" placeholder="ALL"></label>
+      <label><input type="checkbox" name="mentors">Show mentors only</label><button type="submit">Apply filter</button></form>
+    <div id="directoryResults" class="grid"></div><div id="directoryPager" class="pager"></div>
+  </section>
+  <section id="profileSection" aria-labelledby="profileTitle" hidden><h2 id="profileTitle">Your profile and privacy</h2>
+    <p id="verificationStatus" class="notice"></p>
+    <form id="profileForm" class="panel"><input name="expectedVersion" type="hidden" value="0">
+      <div class="fields">
+        <label>Degree<input name="degree" maxlength="80" required></label><label>Graduation year<input type="number" name="graduationYear" min="1900" max="2200" required></label>
+        <label>Company<input name="company" maxlength="120"></label><label>Designation<input name="designation" maxlength="100"></label>
+        <label>Location<input name="location" maxlength="100"></label><label>LinkedIn profile (HTTPS)<input name="linkedin" type="url" maxlength="250"></label>
+      </div><label>Professional bio<textarea name="bio" maxlength="2000" rows="3"></textarea></label>
+      <fieldset><legend>Directory visibility</legend>
+        <p>Your name, department, degree and graduation year appear to signed-in university users only when verified and listed.</p>
+        <label><input type="checkbox" name="directoryVisible">List my profile in the directory</label>
+        <label><input type="checkbox" name="showCareer">Show company and designation</label><label><input type="checkbox" name="showLocation">Show location</label>
+        <label><input type="checkbox" name="showBio">Show biography</label><label><input type="checkbox" name="showLinkedIn">Show LinkedIn link</label>
+        <label><input type="checkbox" name="mentor">I am open to mentorship</label><label><input type="checkbox" name="refer">I am open to referrals</label>
+      </fieldset><button class="primary" type="submit">Save profile and preferences</button>
+    </form>
+  </section>
+  <section id="jobsSection" aria-labelledby="jobsTitle" hidden><h2 id="jobsTitle">Career opportunities</h2>
+    <form id="jobFilter" class="toolbar"><label>Department<input name="department" maxlength="80" placeholder="ALL"></label><button>Apply filter</button></form>
+    <div id="jobResults" class="grid"></div><div id="jobPager" class="pager"></div>
+    <h3>Publish an opportunity</h3><p>Verified graduates may publish opportunities. External employers and links are not university endorsements.</p>
+    <form id="jobForm" class="panel"><div class="fields">
+      <label>Company<input name="companyName" required maxlength="120"></label><label>Job title<input name="jobTitle" required maxlength="120"></label>
+      <label>Job type<select name="jobType"><option>FULL_TIME</option><option>INTERNSHIP</option><option>REMOTE</option><option>HYBRID</option></select></label>
+      <label>Location<input name="location" maxlength="100"></label><label>Target department<input name="targetDepartment" value="ALL" required maxlength="80"></label>
+      <label>HTTPS application link or contact email<input name="linkOrEmail" required maxlength="250"></label>
+    </div><label>Description<textarea name="description" required maxlength="4000" rows="3"></textarea></label><button class="primary">Publish opportunity</button></form>
+    <h3>Your listings</h3><div id="ownJobResults" class="grid"></div><div id="ownJobPager" class="pager"></div>
+  </section>
+  <section id="reviewSection" aria-labelledby="reviewTitle" th:if="${canVerify}" hidden><h2 id="reviewTitle">Independent verification desk</h2>
+    <p>Verify graduation against authorized university records before approving. A profile declaration alone is insufficient. You cannot verify your own profile.</p>
+    <div id="reviewResults" class="grid"></div><div id="reviewPager" class="pager"></div>
+    <form id="reviewLookup" class="toolbar"><label>Profile ID<input type="number" name="id" min="1" required></label><button>Review an existing profile</button></form><div id="reviewLookupResult"></div>
+  </section>
+</main>
+<script src="/js/alumni.js" defer></script>
+</body></html>

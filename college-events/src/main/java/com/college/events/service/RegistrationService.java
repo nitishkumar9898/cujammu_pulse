@@ -2,16 +2,19 @@ package com.college.events.service;
 
 import com.college.events.model.*;
 import com.college.events.repository.EventRepository;
+import com.college.events.repository.EventOperationsRepository;
 import com.college.events.repository.RegistrationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+import com.college.events.dto.CalendarDtos;
+import org.springframework.data.domain.PageRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +28,27 @@ public class RegistrationService {
     private final EmailService emailService;
     private final NotificationService notificationService;
     private final AuditService auditService;
+    private final EventOperationsRepository eventOperations;
+    private final com.college.events.repository.TeamMemberRepository teamMembers;
+    @Autowired private FeatureFlagService featureFlags;
+
+    @Transactional(readOnly = true)
+    public CalendarDtos.Page myCalendar(User actor, int page) {
+        if (page < 0 || page > 10000) throw new IllegalArgumentException("Invalid calendar page");
+        if (featureFlags != null) {
+            featureFlags.requireEnabledForRead("MODULE_EVENTS");
+            featureFlags.requireEnabledForRead("MODULE_CALENDAR");
+        }
+        var slice = registrationRepository.findCalendarPageByUserId(actor.getId(), PageRequest.of(page, 50));
+        return new CalendarDtos.Page(slice.getContent().stream().map(CalendarDtos::entry).toList(), page, slice.hasNext());
+    }
 
     @Transactional
     public Registration register(User user, Long eventId) {
+        if (featureFlags != null) featureFlags.requireEnabledForUpdate("MODULE_EVENTS");
+        // Serialize registration against approved attendance-policy mutation on the same event control row.
+        eventOperations.findForUpdate(eventId)
+            .orElseThrow(() -> new IllegalStateException("Event operations are unavailable"));
         Event event = eventRepository.findById(eventId)
             .orElseThrow(() -> new RuntimeException("Event not found"));
 
@@ -36,6 +57,9 @@ public class RegistrationService {
         }
         if (event.isPast()) {
             throw new RuntimeException("Cannot register for a past event");
+        }
+        if (event.getRegistrationDeadline() != null && !event.getRegistrationDeadline().isAfter(LocalDateTime.now())) {
+            throw new IllegalStateException("Registration for this event has closed");
         }
         if (registrationRepository.existsByUserAndEvent(user, event)) {
             throw new RuntimeException("You are already registered for this event");
@@ -50,7 +74,6 @@ public class RegistrationService {
             .user(user)
             .event(event)
             .status(status)
-            .qrToken(UUID.randomUUID().toString())
             .build();
 
         Registration saved = registrationRepository.save(registration);
@@ -60,8 +83,8 @@ public class RegistrationService {
             emailService.sendRegistrationConfirmation(saved);
             notificationService.createNotification(
                 user,
-                "You're registered for " + event.getTitle() + ". Your QR ticket is ready.",
-                "/student/ticket/" + saved.getId()
+                "You're registered for " + event.getTitle() + ". Secure event-pass display is not enabled yet.",
+                "/student/my-tickets"
             );
         } else {
             emailService.sendWaitlistConfirmation(saved);
@@ -90,7 +113,12 @@ public class RegistrationService {
 
     @Transactional
     public void cancelRegistration(Long registrationId, User user) {
-        Registration registration = registrationRepository.findById(registrationId)
+        long eventId = registrationRepository.findOwnedEventId(registrationId, user.getId())
+            .orElseThrow(com.college.events.security.DomainAccess::denied);
+        eventOperations.findForUpdate(eventId)
+            .orElseThrow(() -> new IllegalStateException("Event operations are unavailable"));
+        // Serialize cancellation with outbox claim-time validation for this registration.
+        Registration registration = registrationRepository.findForUpdate(registrationId)
             .orElseThrow(() -> new RuntimeException("Registration not found"));
 
         if (!registration.getUser().getId().equals(user.getId())) {
@@ -101,6 +129,9 @@ public class RegistrationService {
         }
         if (registration.getStatus() == RegistrationStatus.ATTENDED) {
             throw new RuntimeException("Cannot cancel an attended registration");
+        }
+        if (teamMembers.existsByUserIdAndEventId(user.getId(), eventId)) {
+            throw new IllegalStateException("Team membership must be resolved by the organizer before cancellation");
         }
 
         boolean wasRegistered = registration.getStatus() == RegistrationStatus.REGISTERED;
@@ -136,8 +167,15 @@ public class RegistrationService {
     }
 
     private void promoteFromWaitlist(Event event) {
+        // Cancellation/reschedule lifecycle uses the same event control row. Never create a
+        // new admission after the event has been cancelled or its start time has passed.
+        if (event.getStatus() != EventStatus.APPROVED || event.isPast()
+                || (event.getRegistrationDeadline() != null
+                    && !event.getRegistrationDeadline().isAfter(LocalDateTime.now()))) return;
         Optional<Registration> nextWaitlisted = registrationRepository
-            .findFirstByEventAndStatusOrderByRegisteredAtAsc(event, RegistrationStatus.WAITLISTED);
+            // Registration IDs are allocated only after acquiring this event's guard row,
+            // so they preserve serialized queue order even if wall-clock timestamps tie or drift.
+            .findFirstByEventAndStatusAndUser_EnabledTrueOrderByIdAsc(event, RegistrationStatus.WAITLISTED);
 
         nextWaitlisted.ifPresent(reg -> {
             reg.setStatus(RegistrationStatus.REGISTERED);
@@ -146,7 +184,7 @@ public class RegistrationService {
             notificationService.createNotification(
                 reg.getUser(),
                 "A seat opened up for " + event.getTitle() + ". You're now confirmed.",
-                "/student/ticket/" + reg.getId()
+                "/student/my-tickets"
             );
             notificationService.createNotification(
                 event.getOrganizer(),
@@ -164,10 +202,6 @@ public class RegistrationService {
 
     public Optional<Registration> findByUserAndEvent(User user, Event event) {
         return registrationRepository.findByUserAndEvent(user, event);
-    }
-
-    public Optional<Registration> findByQrToken(String token) {
-        return registrationRepository.findByQrToken(token);
     }
 
     public List<Registration> findByEvent(Event event) {

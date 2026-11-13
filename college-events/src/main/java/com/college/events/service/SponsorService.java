@@ -22,6 +22,8 @@ public class SponsorService {
 
     @Transactional
     public Sponsor addSponsor(Event event, String companyName, String logoUrl, String websiteUrl, String tier) {
+        logoUrl = com.college.events.security.WebUrlPolicy.optionalHttpUrl(logoUrl);
+        websiteUrl = com.college.events.security.WebUrlPolicy.optionalHttpUrl(websiteUrl);
         Sponsor sponsor = Sponsor.builder()
             .event(event)
             .companyName(companyName)

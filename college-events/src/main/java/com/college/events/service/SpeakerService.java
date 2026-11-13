@@ -22,6 +22,8 @@ public class SpeakerService {
 
     @Transactional
     public Speaker addSpeaker(Event event, String name, String bio, String linkedInUrl, String profileImageUrl) {
+        linkedInUrl = com.college.events.security.WebUrlPolicy.optionalHttpUrl(linkedInUrl);
+        profileImageUrl = com.college.events.security.WebUrlPolicy.optionalHttpUrl(profileImageUrl);
         Speaker speaker = Speaker.builder()
             .event(event)
             .name(name)

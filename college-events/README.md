@@ -1,80 +1,42 @@
-# CUJAMMU EVENTHUB 🎓
+# CUJAMMU-PULSE local professor demo
 
-A professional, market-ready University Event Management Platform built with Spring Boot, Thymeleaf, and AI.
+This repository contains a university services platform in active implementation. The isolated `professor-demo` profile is for a local, synthetic walkthrough only. It uses an in-memory H2 database, binds the backend to `127.0.0.1`, disables external email, AI and identity providers, and creates synthetic accounts and records. Demo database contents disappear when the backend stops.
 
-## 🚀 Quick Start (Docker)
+This is not a production deployment guide. The platform has incomplete workflows and has not passed institutional acceptance, target MongoDB replica-set verification, native-device testing, independent security assessment, or production operations review. Do not describe it as production-ready, bug-free, or an official university service.
 
-The fastest way to deploy the production-ready application.
+## Local prerequisites
 
-1. **Clone & Configure**:
+- Windows PowerShell, Node.js/npm, JDK 21, and Maven 3.9 or newer.
+- Keep the checkout on the local machine. No domain or real university data is needed for the professor walkthrough.
 
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your AI_API_KEY
-   ```
+From the repository root, build and check the shared web client:
 
-2. **Launch**:
+```powershell
+rtk proxy powershell -NoProfile -Command "Set-Location cujammu-pulse; npm ci; npm run typecheck; npm test; npm run build:web"
+```
 
-   ```bash
-   docker-compose up -d --build
-   ```
+Build and test the backend:
 
-3. **Access**:
-   - Web App: `http://localhost:8080`
-   - Admin Login: `nitish.work098@gmail.com` / `Admin@123`
+```powershell
+rtk proxy powershell -NoProfile -Command "mvn -f college-events/pom.xml clean verify"
+```
 
----
+Start the backend from the `college-events` directory. Set a temporary password that satisfies the configured password policy; the same password is used by the synthetic demo accounts:
 
-## ✨ Core Features
+```powershell
+rtk proxy powershell -NoProfile -Command "`$env:PROFESSOR_DEMO_ENABLED='true'; `$env:PROFESSOR_DEMO_PASSWORD='Choose-A-Temporary-Strong-Password-123!'; `$env:SPRING_PROFILES_ACTIVE='professor-demo'; Set-Location college-events; java -jar target/events-1.0.0.jar"
+```
 
-- **QR Attendance Ecosystem**: Robust scanner with manual capture, gallery upload, and zoom/torch controls.
-- **AI Assistant**: Multilingual (English, Hindi, Hinglish) RAG-powered chatbot for 24/7 student support.
-- **Automated Certificates**: Professional PDF generation and distribution upon attendance.
-- **Real-time Notifications**: OTP-based registration and event announcements via SMTP.
-- **Analytics Dashboard**: Comprehensive stats for organizers and admins.
-- **Responsive Design**: Premium UI with full Dark Mode support and mobile optimization.
+Open `http://127.0.0.1:18080/`. The seeded synthetic login names are `student@example.invalid`, `finder@example.invalid`, `faculty@example.invalid`, `reviewer@example.invalid`, `admin@example.invalid`, and `warden@example.invalid`; use the temporary password above. Never reuse a personal or production password.
 
----
+The web export must exist at `cujammu-pulse/dist` before startup. The profile writes only beneath `college-events/target/professor-demo/`. Its environment guard rejects production profiles, persistent or alternate database configuration, non-loopback binding, external providers, and workspace-level upload/log paths.
 
-## 🛠 Tech Stack
+## Walkthrough boundaries
 
-- **Backend**: Spring Boot 3.5.14, Java 21
-- **Database**: H2 (Persistent File-based)
-- **Frontend**: Thymeleaf, Vanilla CSS, Bootstrap 5.3
-- **AI**: Google Gemini 2.0 Flash
-- **PDF/QR**: OpenHTMLtoPDF, ZXing, Html5-QRCode
+Use the walkthrough to review available shared web flows with synthetic records. The following remain unavailable or incomplete and must be presented that way: verified campus/library QR scanning and scoped library reports, event attendance issuance and physical scan verification, approved academic PDFs and timetable publication, production notification delivery, native camera/offline behavior, MongoDB concurrency and recovery, and several complete office workflows.
 
----
+The synthetic professor demo is evidence for those exact local flows only. It does not prove production authorization, university policy, mobile-device behavior, resilience, load capacity, privacy/legal acceptance, or security. The release matrix at the repository root lists current implementation evidence and outstanding gates.
 
-## 🔧 Manual Setup (Local)
+## Production is a separate release
 
-If you prefer running without Docker:
-
-1. **Requirements**: JDK 21+, Maven 3.9+
-
-2. **Build**:
-
-   ```bash
-   mvn clean install -DskipTests
-   ```
-
-3. **Run**:
-
-   ```bash
-   java -jar target/events-1.0.0.jar
-   ```
-
----
-
-## 🔐 Security & Hardening
-
-- **OTP Verification**: Rate-limited registration and brute-force protection.
-- **CSRF Protection**: Enabled on all forms and AJAX endpoints.
-- **Audit Logging**: All critical admin/organizer actions are tracked.
-- **Environment Isolation**: Sensitive credentials managed via `.env`.
-
----
-
-## 👨‍💻 Developed by CUJAMMU Team
-
-Ready for 100% bug-free deployment.
+The bundled Docker image runs with the `prod` profile; `docker compose up` is not the isolated professor demo. Do not expose that deployment or connect production data until the required institutional configuration, privacy and security reviews, target-database migration/restore tests, native and web acceptance, monitoring/on-call ownership, signed release artifacts, and university approval are complete. No test result establishes zero defects or zero vulnerabilities.

@@ -3,6 +3,7 @@ package com.college.events.dto;
 import com.college.events.model.Role;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 public class UserRegistrationDto {
@@ -19,9 +20,11 @@ public class UserRegistrationDto {
     @Size(min = 8, message = "Password must be at least 8 characters")
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).*$",
              message = "Password must contain at least one uppercase, one lowercase, one digit, and one special character")
+    @ToString.Exclude
     private String password;
 
     @NotBlank(message = "Please confirm your password")
+    @ToString.Exclude
     private String confirmPassword;
 
     @NotNull(message = "Role is required")

@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Simple in-memory rate limiting filter for login and forgot-password endpoints.
  * Limits to 10 requests per minute per IP address.
  */
-@Component
-@Order(1)
+// Retained as legacy reference only; AuthenticationRateLimitFilter owns auth enforcement.
+@Deprecated
 @Slf4j
 @SuppressWarnings("null")
 public class RateLimitingFilter extends OncePerRequestFilter {

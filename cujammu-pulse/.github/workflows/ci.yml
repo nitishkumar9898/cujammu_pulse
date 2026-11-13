@@ -1,0 +1,47 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [ master ]
+    paths: [ 'cujammu-pulse/**' ]
+  pull_request:
+    branches: [ master ]
+    paths: [ 'cujammu-pulse/**' ]
+
+jobs:
+  frontend-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cujammu-pulse/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: cujammu-pulse
+
+      - name: TypeScript Check
+        run: npm run typecheck
+        working-directory: cujammu-pulse
+
+      - name: Run Unit Tests
+        run: npm test -- --passWithNoTests
+        working-directory: cujammu-pulse
+
+      - name: Build Web
+        run: npm run build:web
+        working-directory: cujammu-pulse
+
+      - name: Upload Build Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: cujammu-pulse/dist/

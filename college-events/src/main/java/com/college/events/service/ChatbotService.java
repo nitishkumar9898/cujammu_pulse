@@ -15,6 +15,9 @@ import java.util.List;
 @Slf4j
 public class ChatbotService {
 
+    private static final int MAX_MESSAGE_LENGTH = 2000;
+    private static final int MAX_AI_RESPONSE_LENGTH = 4000;
+
     private final EventRepository eventRepository;
     private final GeminiAIService geminiAIService;
 
@@ -25,21 +28,39 @@ public class ChatbotService {
             return "Hello! I am the CUJAMMU EVENTHUB Assistant. Ask me about Upcoming events, registration, or venues!";
         }
 
+        String normalizedMessage = normalizeMessage(message);
+        if (normalizedMessage.length() > MAX_MESSAGE_LENGTH) {
+            return "Please keep your question within 2,000 characters and avoid sending personal or confidential information.";
+        }
+        if (looksLikePromptInjection(normalizedMessage)) {
+            return "I can answer university questions using approved campus information, but I cannot reveal system instructions or access confidential data.";
+        }
+
+        // Security & Confidentiality Guardrail: Block credential harvesting & sensitive leaks
+        String lowerMsg = normalizedMessage.toLowerCase();
+        if (lowerMsg.contains("password") || lowerMsg.contains("secret") || lowerMsg.contains("token")
+                || lowerMsg.contains("api_key") || lowerMsg.contains("private key") || lowerMsg.contains("admin pass")
+                || lowerMsg.contains("otp") || lowerMsg.contains("database password")) {
+            return "🔒 Confidentiality Notice: The CUJAMMU AI Assistant is strictly barred from accessing, processing, or disclosing passwords, tokens, API credentials, or private personal data pursuant to University Information Security & DPDP guidelines.";
+        }
+
         if (geminiAIService.isAvailable()) {
             try {
-                String detectedLang = detectLanguage(message);
+                String detectedLang = detectLanguage(normalizedMessage);
                 String context = buildRAGContext();
                 String systemPrompt = buildSystemPrompt(context, detectedLang);
-                String aiResponse = geminiAIService.generateResponse(systemPrompt, message);
+                String aiResponse = geminiAIService.generateResponse(systemPrompt, normalizedMessage);
                 if (aiResponse != null && !aiResponse.isBlank()) {
-                    return aiResponse;
+                    return aiResponse.strip().length() > MAX_AI_RESPONSE_LENGTH
+                            ? aiResponse.strip().substring(0, MAX_AI_RESPONSE_LENGTH)
+                            : aiResponse.strip();
                 }
             } catch (Exception e) {
                 log.warn("AI chatbot failed: {}", e.getMessage());
             }
         }
 
-        return processRuleBased(message);
+        return processRuleBased(normalizedMessage);
     }
 
     private String detectLanguage(String message) {
@@ -71,8 +92,8 @@ public class ChatbotService {
     private String buildRAGContext() {
         StringBuilder ctx = new StringBuilder();
         LocalDateTime now = LocalDateTime.now();
-        List<Event> upcoming = eventRepository.findUpcomingApprovedEvents(now);
-        List<Event> past = eventRepository.findPastApprovedEvents(now);
+        List<Event> upcoming = eventRepository.findUpcomingApprovedEvents(now, org.springframework.data.domain.PageRequest.of(0, 10));
+        List<Event> past = eventRepository.findPastApprovedEvents(now, org.springframework.data.domain.PageRequest.of(0, 5));
         
         ctx.append("### OFFICIAL UNIVERSITY EVENT DATA (Current Date: ").append(now.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))).append(")\n");
         if (upcoming.isEmpty() && past.isEmpty()) {
@@ -81,10 +102,10 @@ public class ChatbotService {
             if (!upcoming.isEmpty()) {
                 ctx.append("--- UPCOMING EVENTS ---\n");
                 upcoming.stream().limit(10).forEach(e -> {
-                    ctx.append("- EVENT: \"").append(e.getTitle()).append("\"\n");
-                    ctx.append("  Venue: ").append(e.getVenue()).append("\n");
+                    ctx.append("- EVENT: \"").append(safeContext(e.getTitle(), 120)).append("\"\n");
+                    ctx.append("  Venue: ").append(safeContext(e.getVenue(), 120)).append("\n");
                     ctx.append("  Schedule: ").append(e.getEventDate().format(DTF)).append("\n");
-                    ctx.append("  Category: ").append(e.getCategory() != null ? e.getCategory().getName() : "General").append("\n");
+                    ctx.append("  Category: ").append(safeContext(e.getCategory() != null ? e.getCategory().getName() : "General", 80)).append("\n");
                     ctx.append("  Entry Fee: ").append(e.getFees() != null && e.getFees() > 0 ? "₹" + e.getFees() : "FREE").append("\n");
                     ctx.append("  Registration: Open via Student Dashboard\n\n");
                 });
@@ -92,8 +113,8 @@ public class ChatbotService {
             if (!past.isEmpty()) {
                 ctx.append("--- PAST EVENTS ---\n");
                 past.stream().limit(5).forEach(e -> {
-                    ctx.append("- EVENT: \"").append(e.getTitle()).append("\"\n");
-                    ctx.append("  Venue: ").append(e.getVenue()).append("\n");
+                    ctx.append("- EVENT: \"").append(safeContext(e.getTitle(), 120)).append("\"\n");
+                    ctx.append("  Venue: ").append(safeContext(e.getVenue(), 120)).append("\n");
                     ctx.append("  Date: ").append(e.getEventDate().format(DTF)).append("\n");
                     ctx.append("  Status: COMPLETED\n\n");
                 });
@@ -121,6 +142,31 @@ public class ChatbotService {
         String detectedLang = detectLanguage(message);
         LocalDateTime now = LocalDateTime.now();
 
+        // Safe deterministic intents run before database-dependent event replies.
+        if (matchesAny(lower, "good morning", "good evening", "kaise ho")) {
+            return "Hello! I am the CUJAMMU EVENTHUB Assistant.";
+        }
+        if (matchesAny(lower, "dhanyavaad")) {
+            return "You are welcome! I am the CUJAMMU EVENTHUB Assistant. Happy to help!";
+        }
+        if (matchesAny(lower, "how many", "kitne") || lower.matches(".*\\b(stats|statistics|count)\\b.*")) {
+            long upcoming = eventRepository.countByStatusAndEventDateAfter(EventStatus.APPROVED, now);
+            return "Event Statistics: " + eventRepository.count() + " total events; "
+                    + eventRepository.countByStatus(EventStatus.APPROVED) + " approved events; "
+                    + upcoming + " upcoming events.";
+        }
+        if (lower.contains("free") || lower.contains("muft")) {
+            List<Event> freeCandidates = eventRepository.findUpcomingFreeApprovedEvents(now, org.springframework.data.domain.PageRequest.of(0, 10));
+            return freeCandidates.isEmpty() ? "No free events are currently scheduled."
+                    : "Here are the Free Events: " + freeCandidates.get(0).getTitle();
+        }
+        if (lower.contains("today") || lower.contains("aaj")) {
+            List<Event> todayCandidates = eventRepository.findApprovedEventsInDay(now.toLocalDate().atStartOfDay(),
+                    now.toLocalDate().plusDays(1).atStartOfDay(), org.springframework.data.domain.PageRequest.of(0, 10));
+            return todayCandidates.isEmpty() ? "No events are scheduled today."
+                    : "Today's events: " + todayCandidates.get(0).getTitle();
+        }
+
         // 1. SPECIFIC KEYWORDS (High Priority)
         if (matchesAny(lower, "tech", "cultur", "sport", "workshop", "hackathon", "debate", "quiz")) {
             String cat = lower.contains("tech") ? "Technical" : 
@@ -137,7 +183,7 @@ public class ChatbotService {
         }
 
         if (matchesAny(lower, "regist", "sign", "join", "enroll", "pajikaran")) {
-            return "The Registration Process is simple: Login as a student and click 'Register' on any event page.";
+            return "The Registration Process is simple: sign in as a student, open the event, then use the 'Register Now' action.";
         }
 
         if (matchesAny(lower, "cert", "e-cert", "proof", "attended", "praman")) {
@@ -145,7 +191,7 @@ public class ChatbotService {
         }
 
         if (matchesAny(lower, "qr", "ticket", "scan", "entry")) {
-            return "Your QR Tickets are available in the 'My Tickets' section. Show them at the venue for attendance.";
+            return "You can view your event registrations in My Tickets. Secure event-pass display is not enabled in this release.";
         }
 
         // 2. GREETINGS & HELP
@@ -162,20 +208,17 @@ public class ChatbotService {
         }
 
         // 3. GENERIC EVENT QUERIES
-        if (matchesAny(lower, "event", "program", "upcoming", "schedule", "kab hai", "aane wale", "stat", "count", "today", "past", "previous")) {
+        if (matchesAny(lower, "event", "program", "upcoming", "schedule", "kab hai", "aane wale", "stat", "count", "how many", "kitne", "today", "past", "previous")) {
             if (lower.contains("past") || lower.contains("previous")) {
-                List<Event> past = eventRepository.findPastApprovedEvents(now);
+                List<Event> past = eventRepository.findPastApprovedEvents(now, org.springframework.data.domain.PageRequest.of(0, 5));
                 if (past.isEmpty()) return "No past events found.";
                 return "Past event: " + past.get(0).getTitle() + " was held at " + past.get(0).getVenue();
             }
-            List<Event> events = eventRepository.findUpcomingApprovedEvents(now);
+            List<Event> events = eventRepository.findUpcomingApprovedEvents(now, org.springframework.data.domain.PageRequest.of(0, 10));
             if (events.isEmpty()) {
                 if (detectedLang.contains("HINDI")) return "अभी कोई upcoming event नहीं है।";
                 if (detectedLang.contains("HINGLISH")) return "Abhi koi upcoming event nahi hai.";
                 return "No upcoming events at the moment.";
-            }
-            if (lower.contains("stat") || lower.contains("count")) {
-                return "Event Statistics: " + events.size() + " upcoming events found.";
             }
             if (lower.contains("free") || lower.contains("muft")) {
                 return "Here are the Free Events: " + events.get(0).getTitle();
@@ -205,6 +248,25 @@ public class ChatbotService {
             if (input.contains(keyword)) return true;
         }
         return false;
+    }
+
+    private static String normalizeMessage(String message) {
+        return message.replaceAll("[\\p{Cntrl}&&[^\\r\\n\\t]]", "").trim();
+    }
+
+    private static boolean looksLikePromptInjection(String message) {
+        String lower = message.toLowerCase();
+        return lower.contains("ignore previous") || lower.contains("ignore all instructions")
+                || lower.contains("reveal system prompt") || lower.contains("show system prompt")
+                || lower.contains("developer message") || lower.contains("jailbreak")
+                || lower.contains("act as system");
+    }
+
+    private static String safeContext(String value, int max) {
+        if (value == null) return "";
+        String cleaned = value.replaceAll("[\\p{Cntrl}&&[^\\r\\n\\t]]", "")
+                .replace("###", "# # #").replace("<", "").replace(">", "").trim();
+        return cleaned.length() > max ? cleaned.substring(0, max) : cleaned;
     }
 
     // ─── TEST SUPPORT ─────────────────────────────────────────────────────────

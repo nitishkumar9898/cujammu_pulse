@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pulse Social Wall & Victory Showcases — CUJAMMU-PULSE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="/css/style.css" rel="stylesheet"/>
+  <style>
+    .victory-card {
+      background: linear-gradient(135deg, #1A1F2C 0%, #2A2111 50%, #1A1F2C 100%);
+      border: 2px solid #D4AF37;
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.15);
+      color: #FFFFFF;
+    }
+    .post-card {
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 16px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .post-card:hover {
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    .gold-trophy {
+      color: #D4AF37;
+      text-shadow: 0 0 12px rgba(212,175,55,0.6);
+    }
+    .like-btn.liked {
+      color: #EF4444 !important;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+<!-- Top navigation bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3" style="background: linear-gradient(90deg, #0B2238 0%, #133658 100%) !important;">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center fw-bold" href="/">
+      <img src="/images/cujammu_logo_circle.png" alt="CUJammu Emblem" style="width: 38px; height: 38px; border-radius: 50%; margin-right: 10px;">
+      <span>CUJAMMU<span style="color: #D4AF37;">-PULSE</span> <span class="badge bg-danger ms-2" style="font-size: 11px;">WALL</span></span>
+    </a>
+    <div class="d-flex align-items-center gap-3">
+      <a href="/sports" class="btn btn-outline-warning btn-sm rounded-pill"><i class="bi bi-trophy-fill me-1"></i>Live Sports</a>
+      <a href="/alumni" class="btn btn-outline-light btn-sm rounded-pill"><i class="bi bi-mortarboard-fill me-1"></i>Alumni Hub</a>
+      <a href="/login" class="btn btn-warning btn-sm rounded-pill fw-bold text-dark"><i class="bi bi-box-arrow-in-right me-1"></i>Dashboard</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+  <div class="row g-4 justify-content-center">
+    
+    <!-- Main Wall Feed Column -->
+    <div class="col-lg-8">
+
+      <!-- Create New Post Card -->
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px; font-size: 18px;">
+              <i class="bi bi-pencil-square"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold mb-0">Share with Central University of Jammu</h6>
+              <p class="text-muted small mb-0">Post campus updates, photos, brochures, or announce event winners!</p>
+            </div>
+          </div>
+
+          <form id="postForm" onsubmit="submitPost(event)">
+            <div class="mb-3">
+              <textarea id="postContent" class="form-control rounded-3" rows="3" placeholder="What's happening on campus today? Announce event news, achievements, or share thoughts..." required></textarea>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <input type="url" id="mediaUrl" class="form-control form-control-sm rounded-3" placeholder="Optional Media URL (Image/Banner/PDF)">
+              </div>
+              <div class="col-md-6">
+                <select id="categorySelect" class="form-select form-select-sm rounded-3">
+                  <option value="GENERAL">General Campus Post</option>
+                  <option value="EVENT_UPDATE">Event Update</option>
+                  <option value="VICTORY_BANNER">🏆 Victory Banner</option>
+                  <option value="ALUMNI_CORNER">🎓 Alumni Corner</option>
+                  <option value="CLUB_NEWS">🎭 Club News</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Victory announcement expandable fields -->
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="winnerToggle" onchange="toggleWinnerFields(this.checked)">
+              <label class="form-check-label small fw-semibold" for="winnerToggle">🏆 Is this an Official Winner / Tournament Victory Showcase?</label>
+            </div>
+
+            <div id="winnerFields" class="d-none p-3 rounded-3 mb-3" style="background: rgba(212,175,55,0.1); border: 1px dashed #D4AF37;">
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <input type="text" id="winnerName" class="form-control form-control-sm" placeholder="Winning Team / Person">
+                </div>
+                <div class="col-md-4">
+                  <input type="text" id="eventTitle" class="form-control form-control-sm" placeholder="Tournament / Event Title">
+                </div>
+                <div class="col-md-4">
+                  <input type="text" id="winningPrize" class="form-control form-control-sm" placeholder="Prize (e.g. Gold Cup & ₹10,000)">
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted small"><i class="bi bi-shield-check text-success me-1"></i>Moderated & Safe Feed</span>
+              <button type="submit" class="btn btn-primary px-4 rounded-pill fw-bold" style="background: #133658; border-color: #133658;">
+                <i class="bi bi-send-fill me-1"></i>Publish Post
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Live Stream Feed Header -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-broadcast text-danger me-2"></i>Live Campus Stream</h5>
+        <span class="badge bg-secondary-subtle text-dark border small fw-semibold">Real-time Sync</span>
+      </div>
+
+      <!-- Posts List -->
+      <div id="feedList" class="d-flex flex-column gap-4">
+        
+        <!-- SSR Loop -->
+        <div th:each="post : ${posts}" class="card post-card bg-white"
+             th:classappend="${post.isWinnerAnnouncement} ? 'victory-card' : ''"
+             th:id="'post-' + ${post.id}">
+          <div class="card-body p-4">
+            
+            <!-- Author Row -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                     style="width: 44px; height: 44px; font-size: 17px;"
+                     th:styleappend="${post.isWinnerAnnouncement} ? 'background: #D4AF37; color: #000 !important;' : 'background: #133658;'"
+                     th:text="${#strings.substring(post.author.name,0,1).toUpperCase()}">U</div>
+                <div>
+                  <h6 class="fw-bold mb-0 text-truncate" style="max-width: 280px;">
+                    <span th:text="${post.author.name}">Author</span>
+                    <span th:if="${post.isWinnerAnnouncement}" class="ms-1">🏆</span>
+                  </h6>
+                  <p class="small mb-0 opacity-75" th:text="${post.author.department != null ? post.author.department : 'CUJammu'} + ' • ' + ${#temporals.format(post.createdAt, 'MMM d, h:mm a')}">Dept</p>
+                </div>
+              </div>
+              <span class="badge rounded-pill"
+                    th:classappend="${post.isWinnerAnnouncement} ? 'bg-warning text-dark fw-bold' : 'bg-primary-subtle text-primary border'"
+                    th:text="${post.category}">CATEGORY</span>
+            </div>
+
+            <!-- Post Text Content -->
+            <p class="mb-3" style="line-height: 1.6;" th:text="${post.content}">Post Content</p>
+
+            <!-- Winner Showcase Banner Card -->
+            <div th:if="${post.isWinnerAnnouncement}" class="p-3 rounded-4 text-center my-3" style="background: rgba(0,0,0,0.35); border: 1px solid rgba(212,175,55,0.4);">
+              <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-2">OFFICIAL VICTORY SHOWCASE</span>
+              <h4 class="fw-black text-warning mb-1 gold-trophy"><i class="bi bi-trophy-fill me-2"></i><span th:text="${post.winnerName}">Champions</span></h4>
+              <p class="small text-light mb-1" th:text="${post.relatedEventTitle}">Tournament Title</p>
+              <span th:if="${post.winningPrize != null}" class="badge bg-success-subtle text-success border px-3 py-1 rounded-pill" th:text="'Award: ' + ${post.winningPrize}">Prize</span>
+            </div>
+
+            <!-- Media Banner (Image/PDF Link) -->
+            <div th:if="${post.mediaUrl != null and !#strings.isEmpty(post.mediaUrl)}" class="mb-3">
+              <img th:src="${post.mediaUrl}" class="img-fluid rounded-3 w-100" style="max-height: 380px; object-fit: cover;" alt="Attached media">
+            </div>
+
+            <hr class="my-2 opacity-25">
+
+            <!-- Actions Bar (Like, Comment, Share) -->
+            <div class="d-flex justify-content-between align-items-center pt-2">
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-light rounded-pill px-3 like-btn"
+                        th:id="'like-btn-' + ${post.id}"
+                        th:onclick="'toggleLike(' + ${post.id} + ')'">
+                  <i class="bi bi-heart-fill me-1"></i><span th:id="'likes-count-' + ${post.id}" th:text="${post.likesCount}">0</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-light rounded-pill px-3"
+                        th:onclick="'toggleComments(' + ${post.id} + ')'">
+                  <i class="bi bi-chat-dots-fill me-1"></i><span th:id="'comments-count-' + ${post.id}" th:text="${post.commentsCount}">0</span>
+                </button>
+              </div>
+              <button type="button" class="btn btn-sm btn-light rounded-pill px-3"
+                      th:attr="data-author=${post.author.name},data-content=${post.content}"
+                      onclick="sharePost(this.dataset.author, this.dataset.content)">
+                <i class="bi bi-share-fill me-1"></i>Share
+              </button>
+            </div>
+
+            <!-- Comments Drawer -->
+            <div th:id="'comments-drawer-' + ${post.id}" class="d-none mt-3 p-3 rounded-3 bg-light text-dark">
+              <div th:id="'comments-list-' + ${post.id}" class="small mb-2"></div>
+              <div class="input-group input-group-sm">
+                <input type="text" th:id="'comment-input-' + ${post.id}" class="form-control" placeholder="Write a comment...">
+                <button class="btn btn-primary" style="background: #133658;" type="button" th:onclick="'submitComment(' + ${post.id} + ')'">Send</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Right Column: Victory Highlights & Quick Links -->
+    <div class="col-lg-4">
+      
+      <!-- Victory Hall of Fame -->
+      <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: linear-gradient(135deg, #2A1B00 0%, #3D2900 100%); color: white; border: 1px solid #D4AF37 !important;">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-trophy-fill text-warning fs-5"></i>
+            <h6 class="fw-bold mb-0 text-warning">Victory Showcase Board</h6>
+          </div>
+          <p class="small opacity-75 mb-3">Recent tournament champions and fest winners officially showcased on campus.</p>
+
+          <div class="d-flex flex-column gap-3">
+            <div th:each="v : ${victories}" class="p-2 rounded-3" style="background: rgba(255,255,255,0.06); border-left: 3px solid #D4AF37;">
+              <p class="fw-bold mb-0 text-warning small" th:text="${v.winnerName}">Winner</p>
+              <p class="text-light small mb-0 opacity-75" th:text="${v.relatedEventTitle}">Event Title</p>
+            </div>
+            <div th:if="${victories == null or #lists.isEmpty(victories)}" class="text-muted small">
+              All ongoing tournament results will appear here automatically!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Platform Links -->
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <h6 class="fw-bold mb-3"><i class="bi bi-grid-fill text-primary me-2"></i>Campus Portals</h6>
+          <div class="d-flex flex-column gap-2">
+            <a href="/sports" class="btn btn-outline-dark text-start rounded-3 p-2 small"><i class="bi bi-trophy me-2 text-warning"></i>Cricbuzz Live Sports Scorecard</a>
+            <a href="/alumni" class="btn btn-outline-dark text-start rounded-3 p-2 small"><i class="bi bi-mortarboard me-2 text-primary"></i>Departmental Alumni Directory</a>
+            <a href="/student/dashboard" class="btn btn-outline-dark text-start rounded-3 p-2 small"><i class="bi bi-person-badge me-2 text-success"></i>Student Hub & Registrations</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleWinnerFields(checked) {
+  const el = document.getElementById('winnerFields');
+  if (checked) {
+    el.classList.remove('d-none');
+    document.getElementById('categorySelect').value = 'VICTORY_BANNER';
+  } else {
+    el.classList.add('d-none');
+  }
+}
+
+function submitPost(e) {
+  e.preventDefault();
+  const content = document.getElementById('postContent').value.trim();
+  const mediaUrl = document.getElementById('mediaUrl').value.trim();
+  const category = document.getElementById('categorySelect').value;
+  const isWinner = document.getElementById('winnerToggle').checked;
+  const winnerName = document.getElementById('winnerName').value.trim();
+  const eventTitle = document.getElementById('eventTitle').value.trim();
+  const prize = document.getElementById('winningPrize').value.trim();
+
+  fetch('/api/v1/cujammu/feed', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      content: content,
+      mediaUrl: mediaUrl,
+      mediaType: mediaUrl ? 'IMAGE' : (isWinner ? 'VICTORY_SHOWCASE' : 'NONE'),
+      category: category,
+      isWinnerAnnouncement: isWinner,
+      winnerName: winnerName,
+      eventTitle: eventTitle,
+      winningPrize: prize
+    })
+  })
+  .then(r => {
+    if (!r.ok) throw new Error('Failed to create post. Please login or check network.');
+    return r.json();
+  })
+  .then(post => {
+    location.reload();
+  })
+  .catch(err => {
+    alert(err.message);
+  });
+}
+
+function toggleLike(postId) {
+  fetch('/api/v1/cujammu/feed/' + postId + '/like', { method: 'POST' })
+  .then(r => {
+    if (r.status === 401 || r.status === 403 || r.redirected) {
+      if (confirm('Please sign in to like campus posts. Go to Sign In page?')) {
+        window.location.href = '/login';
+      }
+      return null;
+    }
+    return r.json();
+  })
+  .then(data => {
+    if (!data) return;
+    document.getElementById('likes-count-' + postId).innerText = data.likesCount;
+    const btn = document.getElementById('like-btn-' + postId);
+    if (data.liked) {
+      btn.classList.add('liked');
+    } else {
+      btn.classList.remove('liked');
+    }
+  })
+  .catch(err => console.error(err));
+}
+
+function toggleComments(postId) {
+  const drawer = document.getElementById('comments-drawer-' + postId);
+  if (drawer.classList.contains('d-none')) {
+    drawer.classList.remove('d-none');
+    loadComments(postId);
+  } else {
+    drawer.classList.add('d-none');
+  }
+}
+
+function loadComments(postId) {
+  fetch('/api/v1/cujammu/feed/' + postId + '/comments')
+  .then(r => r.json())
+  .then(comments => {
+    const list = document.getElementById('comments-list-' + postId);
+    list.innerHTML = '';
+    if (!comments || comments.length === 0) {
+      list.innerHTML = '<span class="text-muted small">No comments yet. Be the first to cheer them on!</span>';
+    } else {
+      comments.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'py-1 border-bottom small';
+        const author = document.createElement('strong');
+        author.className = 'text-primary';
+        author.textContent = (c.author ? c.author.name : 'CUJ Member') + ':';
+        item.append(author, document.createTextNode(' ' + c.content));
+        list.appendChild(item);
+      });
+    }
+  })
+  .catch(err => console.error(err));
+}
+
+function submitComment(postId) {
+  const input = document.getElementById('comment-input-' + postId);
+  const content = input.value.trim();
+  if (!content) return;
+
+  fetch('/api/v1/cujammu/feed/' + postId + '/comment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content: content })
+  })
+  .then(r => {
+    if (r.status === 401 || r.status === 403 || r.redirected) {
+      if (confirm('Please sign in to comment on posts. Go to Sign In page?')) {
+        window.location.href = '/login';
+      }
+      return null;
+    }
+    return r.json();
+  })
+  .then(c => {
+    if (!c) return;
+    input.value = '';
+    loadComments(postId);
+    const countEl = document.getElementById('comments-count-' + postId);
+    if (countEl) {
+      countEl.innerText = parseInt(countEl.innerText || '0') + 1;
+    }
+  })
+  .catch(err => alert('Unable to post comment: ' + err.message));
+}
+
+function sharePost(author, text) {
+  if (navigator.share) {
+    navigator.share({
+      title: 'CUJAMMU-PULSE Wall Post',
+      text: author + ' on CUJAMMU-PULSE:\n' + text,
+      url: window.location.href
+    });
+  } else {
+    navigator.clipboard.writeText(author + ' on CUJAMMU-PULSE:\n' + text + '\n' + window.location.href);
+    alert('Post link and text copied to clipboard!');
+  }
+}
+</script>
+</body>
+</html>

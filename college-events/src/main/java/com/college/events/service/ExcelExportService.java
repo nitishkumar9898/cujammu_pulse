@@ -69,7 +69,7 @@ public class ExcelExportService {
             // --- Registrations Sheet ---
             Sheet dataSheet = workbook.createSheet("Registrations");
             String[] headers = {"Sr.No", "Student Name", "Email", "Department", "Phone",
-                "Enrollment No", "Status", "QR Token", "Registered At", "Attendance Time"};
+                "Enrollment No", "Status", "Registered At", "Attendance Time"};
 
             Row headerRow = dataSheet.createRow(0);
             for (int i = 0; i < headers.length; i++) {
@@ -88,8 +88,7 @@ public class ExcelExportService {
                 row.createCell(4).setCellValue(r.getUser().getPhone() != null ? r.getUser().getPhone() : "");
                 row.createCell(5).setCellValue(r.getUser().getEnrollmentNo() != null ? r.getUser().getEnrollmentNo() : "");
                 row.createCell(6).setCellValue(r.getStatus().name());
-                row.createCell(7).setCellValue(r.getQrToken());
-                row.createCell(8).setCellValue(r.getRegisteredAt() != null ? r.getRegisteredAt().format(FMT) : "");
+                row.createCell(7).setCellValue(r.getRegisteredAt() != null ? r.getRegisteredAt().format(FMT) : "");
 
                 // Attendance timestamp
                 String attendanceTime = "";
@@ -98,7 +97,7 @@ public class ExcelExportService {
                         .map(a -> a.getScannedAt() != null ? a.getScannedAt().format(FMT) : "Attended")
                         .orElse("Attended");
                 }
-                row.createCell(9).setCellValue(attendanceTime);
+                row.createCell(8).setCellValue(attendanceTime);
 
                 // Color code by status
                 CellStyle statusStyle = createStatusStyle(workbook, r.getStatus());

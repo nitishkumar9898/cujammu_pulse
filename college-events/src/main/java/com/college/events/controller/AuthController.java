@@ -6,6 +6,7 @@ import com.college.events.model.User;
 import com.college.events.service.EmailService;
 import com.college.events.service.EventService;
 import com.college.events.service.OtpService;
+import com.college.events.service.SafeResetLink;
 import com.college.events.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -21,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,9 +33,17 @@ public class AuthController {
     private final EventService eventService;
     private final EmailService emailService;
     private final OtpService otpService;
+    private final com.college.events.service.PulseFeedService pulseFeedService;
+    private final com.college.events.service.LiveSportsScoreService liveSportsScoreService;
 
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
+
+    @Value("${app.security.reset-link-hosts:}")
+    private String resetLinkAllowedHosts;
+
+    @Value("${app.email.backend:smtp}")
+    private String emailBackend;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -42,21 +52,41 @@ public class AuthController {
         return "home";
     }
 
+    @GetMapping("/feed")
+    public String pulseFeed(Model model) {
+        model.addAttribute("posts", pulseFeedService.getFeed(0, 30).getContent());
+        model.addAttribute("victories", pulseFeedService.getVictoryShowcases());
+        return "feed/index";
+    }
+
+    @GetMapping("/sports")
+    public String liveSports(Model model) {
+        model.addAttribute("liveMatches", liveSportsScoreService.getLiveMatches());
+        model.addAttribute("allMatches", liveSportsScoreService.getAllMatches());
+        return "sports/index";
+    }
+
     @GetMapping("/login")
     public String login(@RequestParam(required = false) String error,
                         @RequestParam(required = false) String logout,
                         @RequestParam(required = false) String expired,
+                        @RequestParam(required = false) String passwordChanged,
                         Model model) {
         if (error != null) model.addAttribute("errorMsg", "Invalid email or password.");
         if (logout != null) model.addAttribute("logoutMsg", "You have been successfully logged out.");
         if (expired != null) model.addAttribute("errorMsg", "Your session has expired. Please login again.");
+        if (passwordChanged != null) model.addAttribute("successMsg", "Password changed. Please sign in with your new password.");
         return "auth/login";
     }
+
+    private static final Role[] REGISTRATION_ROLES = new Role[]{
+        Role.STUDENT, Role.ALUMNI
+    };
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         model.addAttribute("dto", new UserRegistrationDto());
-        model.addAttribute("roles", new Role[]{Role.STUDENT, Role.ORGANIZER});
+        model.addAttribute("roles", REGISTRATION_ROLES);
         return "auth/register";
     }
 
@@ -69,19 +99,61 @@ public class AuthController {
                                   HttpSession session,
                                   RedirectAttributes redirectAttributes,
                                   Model model) {
+        if (!UserService.isPublicRegistrationRole(dto.getRole())) {
+            result.rejectValue("role", "error.dto", "This role requires authorized university provisioning.");
+        }
+        // Strict email validation based on role
+        if (dto.getRole() != null && dto.getEmail() != null) {
+            String email = dto.getEmail().trim().toLowerCase();
+            switch (dto.getRole()) {
+                case STUDENT -> {
+                    if (!email.matches("^[a-zA-Z0-9]+(\\.[a-zA-Z0-9]+)?@([a-zA-Z0-9]+\\.)?cujammu\\.ac\\.in$")) {
+                        result.rejectValue("email", "error.dto",
+                            "Student email must match format: rollno.dept@cujammu.ac.in (e.g. 24beccs63.ccs@cujammu.ac.in)");
+                    }
+                }
+                case FACULTY -> {
+                    if (!email.matches("^[a-zA-Z]+(\\.[a-zA-Z]+)?@([a-zA-Z0-9]+\\.)?cujammu\\.ac\\.in$")) {
+                        result.rejectValue("email", "error.dto",
+                            "Faculty email must match format: name.dept@cujammu.ac.in (no digits, e.g. mann.ccs@cujammu.ac.in)");
+                    }
+                }
+                case STAFF -> {
+                    if (!email.endsWith("@cujammu.ac.in")) {
+                        result.rejectValue("email", "error.dto",
+                            "Staff/Authority email must end with @cujammu.ac.in (e.g. sula.adm@cujammu.ac.in)");
+                    }
+                }
+                case ORGANIZER -> {
+                    if (!email.endsWith("@cujammu.ac.in")) {
+                        result.rejectValue("email", "error.dto",
+                            "Organizer email must end with @cujammu.ac.in (e.g. office.math@cujammu.ac.in)");
+                    }
+                }
+                case ALUMNI -> {
+                    // Alumni are permitted personal email addresses (Gmail, etc.)
+                    if (!email.contains("@") || !email.contains(".")) {
+                        result.rejectValue("email", "error.dto",
+                            "Please enter a valid personal email address (e.g. name@gmail.com)");
+                    }
+                }
+                default -> {}
+            }
+        }
+
         if (result.hasErrors()) {
-            model.addAttribute("roles", new Role[]{Role.STUDENT, Role.ORGANIZER});
+            model.addAttribute("roles", REGISTRATION_ROLES);
             return "auth/register";
         }
         if (!dto.isPasswordMatching()) {
             result.rejectValue("confirmPassword", "error.dto", "Passwords do not match");
-            model.addAttribute("roles", new Role[]{Role.STUDENT, Role.ORGANIZER});
+            model.addAttribute("roles", REGISTRATION_ROLES);
             return "auth/register";
         }
         // Check if email already exists
         if (userService.findByEmail(dto.getEmail()).isPresent()) {
             model.addAttribute("errorMsg", "Email already registered: " + dto.getEmail());
-            model.addAttribute("roles", new Role[]{Role.STUDENT, Role.ORGANIZER});
+            model.addAttribute("roles", REGISTRATION_ROLES);
             return "auth/register";
         }
 
@@ -89,7 +161,7 @@ public class AuthController {
         String otp = otpService.generateOtp(dto.getEmail());
         if (otp == null) {
             model.addAttribute("errorMsg", "Too many OTP requests. Please wait a few minutes and try again.");
-            model.addAttribute("roles", new Role[]{Role.STUDENT, Role.ORGANIZER});
+            model.addAttribute("roles", REGISTRATION_ROLES);
             return "auth/register";
         }
 
@@ -97,11 +169,30 @@ public class AuthController {
         session.setAttribute("pendingRegistration", dto);
         session.setAttribute("pendingEmail", dto.getEmail().toLowerCase().trim());
 
-        // Send OTP email asynchronously (Fire and Forget) to ensure instant UI response
-        emailService.sendOtpEmail(dto.getEmail(), otp, dto.getName());
+        // Send OTP email and wait briefly for the delivery result so the user
+        // sees the REAL status instead of a fake "OTP sent" message.
+        boolean mailSent = false;
+        try {
+            mailSent = emailService.sendOtpEmail(dto.getEmail(), otp, dto.getName())
+                    .get(20, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.warn("OTP email attempt failed; failure type={}", e.getClass().getSimpleName());
+        }
 
-        log.info("OTP sent to {} for registration verification", dto.getEmail());
-        redirectAttributes.addFlashAttribute("successMsg", "✅ OTP has been sent to your email successfully. Please check inbox/spam.");
+        if ("console".equalsIgnoreCase(emailBackend)) {
+            log.info("Console mail backend active; credential delivery unavailable");
+            redirectAttributes.addFlashAttribute("warningMsg",
+                "Verification email is unavailable in this environment. Please contact support.");
+        } else if (mailSent) {
+            log.info("OTP sent to {} for registration verification", dto.getEmail());
+            redirectAttributes.addFlashAttribute("successMsg",
+                "✅ OTP has been sent to your email successfully. Please check inbox/spam.");
+        } else {
+            log.error("OTP email FAILED for {} (check MAIL_USER/MAIL_PASS SMTP config)", dto.getEmail());
+            redirectAttributes.addFlashAttribute("errorMsg",
+                "❌ We could not deliver the OTP email (mail server error). " +
+                "Please try Resend, or contact support.");
+        }
         return "redirect:/register/verify-otp";
     }
 
@@ -179,8 +270,24 @@ public class AuthController {
                 "success", false, "message", "Too many OTP requests. Please wait and try again."));
         }
 
-        emailService.sendOtpEmail(email, otp, dto.getName());
+        boolean mailSent = false;
+        try {
+            mailSent = emailService.sendOtpEmail(email, otp, dto.getName())
+                    .get(20, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.warn("Resend OTP delivery attempt failed; failure type={}", e.getClass().getSimpleName());
+        }
         long remaining = otpService.getRemainingSeconds(email);
+
+        if (!mailSent) {
+            String msg = "console".equalsIgnoreCase(emailBackend)
+                ? "Verification email is unavailable in this environment. Please contact support."
+                : "We could not deliver the verification email. Please try again or contact support.";
+            return ResponseEntity.ok(Map.of(
+                "success", false,
+                "message", msg,
+                "remainingSeconds", remaining));
+        }
 
         return ResponseEntity.ok(Map.of(
             "success", true,
@@ -199,12 +306,14 @@ public class AuthController {
     public String processForgotPassword(@RequestParam String email,
                                         RedirectAttributes redirectAttributes,
                                         Model model) {
-        String token = userService.generatePasswordResetToken(email);
-
-        if (token != null) {
-            String resetLink = baseUrl + "/reset-password?token=" + token;
-            emailService.sendPasswordResetEmail(email, resetLink, token);
-            log.info("Password reset link sent to: {}", email);
+        if (SafeResetLink.isApprovedBaseUrl(baseUrl, resetLinkAllowedHosts)) {
+            String token = userService.generatePasswordResetToken(email);
+            if (token != null) {
+                SafeResetLink.create(baseUrl, token, resetLinkAllowedHosts)
+                        .ifPresent(link -> emailService.sendPasswordResetEmail(email, link));
+            }
+        } else {
+            log.warn("Password recovery suppressed because public HTTPS origin is not allowlisted");
         }
         
         // Always return the same message regardless of whether the email exists
@@ -239,8 +348,10 @@ public class AuthController {
             redirectAttributes.addFlashAttribute("errorMsg", "Passwords do not match.");
             return "redirect:/reset-password?token=" + token;
         }
-        if (newPassword.length() < 8) {
-            redirectAttributes.addFlashAttribute("errorMsg", "Password must be at least 8 characters.");
+        try {
+            com.college.events.service.PasswordPolicy.validate(newPassword);
+        } catch (IllegalArgumentException invalidPassword) {
+            redirectAttributes.addFlashAttribute("errorMsg", invalidPassword.getMessage());
             return "redirect:/reset-password?token=" + token;
         }
         boolean success = userService.resetPasswordWithToken(token, newPassword);

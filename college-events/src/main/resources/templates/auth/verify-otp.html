@@ -2,40 +2,37 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Verify Email — CUJAMMU EVENTHUB</title>
+<title>Verify Email — CUJAMMU PULSE</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 <link href="/css/style.css" rel="stylesheet"/>
 <style>
   .otp-input { width:52px;height:60px;text-align:center;font-size:1.8rem;font-weight:700;
-    border:2px solid #dee2e6;border-radius:12px;transition:all .2s;caret-color:#6C63FF; }
-  .otp-input:focus { border-color:#6C63FF;box-shadow:0 0 0 3px rgba(108,99,255,.2);outline:none; }
-  .otp-input.filled { border-color:#6C63FF;background:#f8f7ff; }
+    border:2px solid #dee2e6;border-radius:8px;transition:all .2s;caret-color:#173e59; }
+  .otp-input:focus { border-color:#173e59;box-shadow:0 0 0 3px rgba(23,62,89,.18);outline:3px solid #b98b36;outline-offset:2px; }
+  .otp-input.filled { border-color:#173e59;background:#edf2f5; }
   .countdown { font-size:2.5rem;font-weight:800;font-variant-numeric:tabular-nums; }
   .countdown.warning { color:#dc3545; }
   .ring { width:100px;height:100px;border-radius:50%;border:4px solid #e9ecef;position:relative; }
-  .ring-fill { position:absolute;inset:-4px;border-radius:50%;border:4px solid #6C63FF;
+  .ring-fill { position:absolute;inset:-4px;border-radius:50%;border:4px solid #173e59;
     clip-path:polygon(50% 0%,100% 0%,100% 100%,0% 100%,0% 0%);transition:clip-path 1s linear; }
   @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
   .pulse { animation:pulse 2s infinite; }
   
   .auth-container { max-width: 480px; }
   .brand-text {
-    background: linear-gradient(135deg, #6C63FF, #3D35A0);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #123149;
   }
   .icon-circle { width: 72px; height: 72px; }
-  .btn-gradient { background: linear-gradient(135deg, #6C63FF, #3D35A0); border: none; }
+  .btn-gradient { background: #173e59; border: 1px solid #173e59; }
 </style>
 </head>
 <body class="auth-bg d-flex align-items-center justify-content-center min-vh-100">
 <div class="container auth-container">
   <div class="text-center mb-4">
     <a href="/" class="text-decoration-none">
-      <i class="bi bi-calendar-event-fill text-primary fs-2"></i>
-      <span class="fw-bold fs-4 ms-2 brand-text">CUJAMMU EVENTHUB</span>
+      <img th:src="@{/images/cujammu_logo_circle.png}" src="/images/cujammu_logo_circle.png" width="54" height="54" alt="Central University of Jammu seal" style="object-fit:contain;vertical-align:middle"/>
+      <span class="fw-bold fs-4 ms-2 brand-text">CUJAMMU PULSE</span>
     </a>
   </div>
 
@@ -52,6 +49,14 @@
 
       <div th:if="${errorMsg}" class="alert alert-danger small py-2">
         <i class="bi bi-exclamation-triangle-fill me-1"></i><span th:text="${errorMsg}"></span>
+      </div>
+
+      <div th:if="${successMsg}" class="alert alert-success small py-2">
+        <i class="bi bi-check-circle-fill me-1"></i><span th:text="${successMsg}"></span>
+      </div>
+
+      <div th:if="${warningMsg}" class="alert alert-warning small py-2">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i><span th:text="${warningMsg}"></span>
       </div>
 
       <!-- Countdown Timer -->
@@ -97,6 +102,7 @@
 const initialSeconds = /*[[${remainingSeconds}]]*/ 120;
 const csrfToken = /*[[${_csrf.token}]]*/ '';
 const csrfParam = /*[[${_csrf.parameterName}]]*/ '_csrf';
+const csrfHeader = /*[[${_csrf.headerName}]]*/ 'X-CSRF-TOKEN';
 
 // OTP Input Logic
 const inputs = document.querySelectorAll('.otp-input');
@@ -163,14 +169,20 @@ function updateCountdown() {
 updateCountdown();
 
 // Resend OTP
+function showResendMessage(message, className) {
+  const status = document.createElement('span');
+  status.className = className;
+  status.textContent = typeof message === 'string' ? message : 'Unable to resend code. Please try again.';
+  document.getElementById('resendMsg').replaceChildren(status);
+}
 function resendOtp() {
   resendBtn.disabled = true;
   resendBtn.classList.remove('pulse');
-  document.getElementById('resendMsg').innerHTML = '<span class="text-muted">Sending...</span>';
+  showResendMessage('Sending...', 'text-muted');
 
   fetch('/register/resend-otp', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', [csrfHeader]: csrfToken },
     body: csrfParam + '=' + encodeURIComponent(csrfToken)
   })
   .then(r => r.json())
@@ -178,17 +190,17 @@ function resendOtp() {
     if (data.success) {
       remaining = data.remainingSeconds || 120;
       countdownEl.classList.remove('warning');
-      document.getElementById('resendMsg').innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>' + data.message + '</span>';
+      showResendMessage(data.message, 'text-success');
       updateCountdown();
       inputs.forEach(i => { i.value = ''; i.classList.remove('filled'); });
       inputs[0].focus();
     } else {
-      document.getElementById('resendMsg').innerHTML = '<span class="text-danger">' + data.message + '</span>';
+      showResendMessage(data.message, 'text-danger');
       resendBtn.disabled = false;
     }
   })
   .catch(() => {
-    document.getElementById('resendMsg').innerHTML = '<span class="text-danger">Network error. Try again.</span>';
+    showResendMessage('Network error. Try again.', 'text-danger');
     resendBtn.disabled = false;
   });
 }

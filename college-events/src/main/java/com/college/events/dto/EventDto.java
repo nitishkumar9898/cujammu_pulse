@@ -9,25 +9,36 @@ import java.time.LocalDateTime;
 
 @Data
 public class EventDto {
+    @PositiveOrZero
+    private Long expectedLifecycleVersion;
 
     @NotBlank(message = "Event title is required")
     @Size(min = 3, max = 200, message = "Title must be between 3 and 200 characters")
     private String title;
 
     @NotBlank(message = "Description is required")
-    @Size(min = 20, message = "Description must be at least 20 characters")
+    @Size(min = 20, max = 10000, message = "Description must be between 20 and 10000 characters")
     private String description;
 
     @NotNull(message = "Category is required")
     private Long categoryId;
 
     @NotBlank(message = "Venue is required")
+    @Size(max = 200)
     private String venue;
 
     @NotNull(message = "Event date and time is required")
     @Future(message = "Event date must be in the future")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime eventDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime eventEndsAt;
+
+    @AssertTrue(message = "Event end time must be after its start time")
+    public boolean isEventIntervalValid() {
+        return eventEndsAt == null || eventDate == null || eventEndsAt.isAfter(eventDate);
+    }
 
     @NotNull(message = "Maximum seats is required")
     @Min(value = 1, message = "Must have at least 1 seat")
@@ -38,6 +49,7 @@ public class EventDto {
     private Double fees = 0.0;
 
     @Email(message = "Please enter a valid contact email")
+    @Size(max = 254)
     private String contactEmail;
 
     private MultipartFile bannerImage;

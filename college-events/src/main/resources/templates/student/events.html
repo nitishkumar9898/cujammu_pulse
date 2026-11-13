@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Browse Events — CUJAMMU EVENTHUB</title>
+<title>Browse Events — CUJAMMU PULSE</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 <link href="/css/style.css" rel="stylesheet"/>
@@ -75,7 +75,7 @@
                  class="card-img-top" style="height:170px;object-fit:cover" alt="Banner"/>
             <div th:unless="${event.bannerImage != null}"
                  class="d-flex align-items-center justify-content-center"
-                 style="height:170px;background:linear-gradient(135deg,#6C63FF15,#3D35A015)">
+                 style="height:170px;background:#e9eef2">
               <i th:class="'bi ' + (${event.category != null} ? ${event.category.icon} : 'bi-calendar-event')"
                  style="font-size:2.8rem;opacity:.35"></i>
             </div>

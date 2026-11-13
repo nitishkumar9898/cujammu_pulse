@@ -27,8 +27,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private RateLimitInterceptor rateLimitInterceptor;
 
+    @Autowired
+    private FeatureFlagInterceptor featureFlagInterceptor;
+
+    @Autowired
+    private MediaExpiryInterceptor mediaExpiryInterceptor;
+
     @Value("${app.upload.dir:./uploads}")
     private String uploadDir;
+    @Value("${app.client.dist:../cujammu-pulse/dist}")
+    private String clientDist;
 
     @PostConstruct
     public void init() {
@@ -45,21 +53,24 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(featureFlagInterceptor)
+                .addPathPatterns("/api/v1/cujammu/**", "/feed/**", "/sports/**", "/alumni/**");
         registry.addInterceptor(rateLimitInterceptor)
-                .addPathPatterns("/api/**", "/login", "/register", "/forgot-password");
+                .addPathPatterns("/api/**");
+        registry.addInterceptor(mediaExpiryInterceptor)
+                .addPathPatterns("/uploads/**");
     }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/app/**")
+                .addResourceLocations(ensureTrailingSlash(Paths.get(clientDist).toAbsolutePath().normalize().toUri().toString()))
+                .setCachePeriod(0);
         Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
         String uploadRoot = ensureTrailingSlash(uploadPath.toUri().toString());
         String legacyEventRoot = ensureTrailingSlash(uploadPath.resolve(EVENTS_DIR).toUri().toString());
 
-        registry.addResourceHandler("/uploads/**")
-            .addResourceLocations(uploadRoot, legacyEventRoot)
-            .setCachePeriod(3600);
-
-        log.info("Serving uploads from: {} and {}", uploadRoot, legacyEventRoot);
+        // Uploaded bytes are delivered exclusively by the authorized MediaDeliveryController.
     }
 
     private String ensureTrailingSlash(String value) {

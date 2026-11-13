@@ -29,19 +29,18 @@ public class CsvExportService {
         try (OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
              CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.builder()
                  .setHeader("Sr.No", "Student Name", "Email", "Department", "Phone",
-                            "Status", "QR Token", "Registered At")
+                            "Status", "Registered At")
                  .build())) {
 
             int i = 1;
             for (Registration r : registrations) {
                 printer.printRecord(
                     i++,
-                    r.getUser().getName(),
-                    r.getUser().getEmail(),
-                    r.getUser().getDepartment(),
-                    r.getUser().getPhone(),
+                    CsvCellSafety.literal(r.getUser().getName()),
+                    CsvCellSafety.literal(r.getUser().getEmail()),
+                    CsvCellSafety.literal(r.getUser().getDepartment()),
+                    CsvCellSafety.literal(r.getUser().getPhone()),
                     r.getStatus().name(),
-                    r.getQrToken(),
                     r.getRegisteredAt() != null ? r.getRegisteredAt().format(FMT) : ""
                 );
             }

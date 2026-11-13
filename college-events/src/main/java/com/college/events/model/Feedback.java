@@ -7,7 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "feedback")
+@Table(name = "feedback", uniqueConstraints = @UniqueConstraint(name = "uk_feedback_event_user", columnNames = {"event_id", "user_id"}))
 @Getter
 @Setter
 @NoArgsConstructor

@@ -7,7 +7,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notifications")
+@Table(name = "notifications", indexes = {
+    @Index(name = "idx_notification_user_id_desc", columnList = "user_id, id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,6 +32,9 @@ public class Notification {
 
     @Column(nullable = false)
     private boolean isRead;
+
+    @Column(nullable = false)
+    private boolean acknowledged;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

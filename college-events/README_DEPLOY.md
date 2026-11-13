@@ -1,11 +1,15 @@
-# CUJAMMU EVENTHUB — Production Deployment Guide 🚀
+> **Status (19 October 2026): legacy guide only.** Do not follow these steps for production or place real university data/secrets into this setup. This guide contains superseded H2/PostgreSQL/MySQL deployment examples. The documented architecture target is MongoDB replica-set transactions, while the current backend still uses a JPA relational bridge; the target database migration and production acceptance are not complete. For the isolated synthetic professor review, use [the current local runbook](../PROFESSOR_DEMO.md). For current verified gaps and release gates, see [the implementation matrix](../CURRENT_IMPLEMENTATION_MATRIX_2026-10-18.md).
+
+# Historical deployment examples — not a production runbook
+
+Current release qualification is defined in [PRODUCTION_RELEASE_GATES.md](../PRODUCTION_RELEASE_GATES.md). The `prod` profile deliberately refuses startup until the reviewed Mongo persistence adapter and migration are implemented. None of the examples below authorizes deployment or supplies that missing implementation.
 
 ## 1. Environment Configuration
 
 Create a `.env` file in the root directory (or set these in your cloud provider's dashboard):
 
 ```env
-# Database Configuration (PostgreSQL/MySQL recommended for production)
+# Historical relational database example; superseded, do not deploy
 DB_URL=jdbc:postgresql://your-db-host:5432/eventhub
 DB_USER=postgres
 DB_PASS=your_secure_password
@@ -23,13 +27,17 @@ CHATBOT_ENABLED=true
 
 # App Settings
 APP_NAME="CUJAMMU EVENTHUB"
-BASE_URL=https://events.cujammu.ac.in
+APP_BASE_URL=https://<institution-approved-host>
+# Exact hostname only; leave empty until the approved HTTPS hostname exists.
+APP_RESET_LINK_HOSTS=<institution-approved-host>
 UPLOAD_DIR=/app/uploads
 ```
 
-## 2. Docker Deployment (Recommended)
+Forgot-password requests retain a generic response. Reset tokens are issued only when the public origin is HTTPS and its exact hostname appears in `APP_RESET_LINK_HOSTS`; an empty value intentionally leaves password recovery unavailable.
 
-We provide a multi-stage `Dockerfile` and `docker-compose.yml` for zero-configuration deployment.
+## 2. Historical Docker example
+
+The Docker configuration selects the blocked `prod` profile. Building an image does not demonstrate a runnable or approved production platform.
 
 ### Build & Run locally
 
@@ -37,7 +45,7 @@ We provide a multi-stage `Dockerfile` and `docker-compose.yml` for zero-configur
 docker-compose up --build -d
 ```
 
-## 3. Cloud Deployment (Railway / Render / Heroku)
+## 3. Superseded cloud examples (do not execute)
 
 1. **Repository**: Push this code to a Private GitHub repository.
 2. **Railway**:

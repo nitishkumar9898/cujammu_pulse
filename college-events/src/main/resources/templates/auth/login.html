@@ -2,15 +2,17 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Login — CUJAMMU EVENTHUB</title>
+<title>Sign in — CUJAMMU PULSE</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 <link href="/css/style.css" rel="stylesheet"/>
 <style>
   .login-card-wrapper { max-width: 900px; }
-  .login-sidebar-bg { background: linear-gradient(135deg, #6C63FF, #3D35A0); }
+  .login-sidebar-bg { background: #123149; }
   .login-icon-lg { font-size: 3.5rem; }
-  .btn-login-gradient { background: linear-gradient(135deg, #6C63FF, #3D35A0); border: none; }
+  .btn-login-gradient { background: #173e59; border: 1px solid #173e59; }
+  .login-mobile-brand img { width: 54px; height: 54px; object-fit: contain; }
+  .login-mobile-brand { color: #123149; }
 </style>
 </head>
 <body class="auth-bg">
@@ -18,29 +20,30 @@
   <div class="row w-100 shadow-lg rounded-4 overflow-hidden login-card-wrapper">
 
     <div class="col-lg-5 d-none d-lg-flex flex-column align-items-center justify-content-center text-white p-5 login-sidebar-bg">
-      <i class="bi bi-calendar-event-fill login-icon-lg"></i>
-      <h3 class="fw-bold mt-3 mb-0 text-center">CUJAMMU EVENTHUB</h3>
+      <img th:src="@{/images/cujammu_logo_circle.png}" src="/images/cujammu_logo_circle.png" alt="Central University of Jammu seal" style="width: 110px; height: 110px; object-fit: contain; border-radius: 50%; background: #ffffff; padding: 4px;">
+      <h3 class="fw-bold mt-3 mb-0 text-center">CUJAMMU<span style="color: #D4AF37;">-PULSE</span></h3>
       <p class="text-center opacity-80 small mb-4">Central University of Jammu</p>
       <div class="mt-2 w-100">
         <div class="d-flex align-items-center gap-3 bg-white bg-opacity-10 rounded-3 p-2 px-3 mb-2">
-          <i class="bi bi-qr-code fs-5"></i><span class="small">QR Ticket Generation</span>
+          <i class="bi bi-calendar-check fs-5"></i><span class="small">Event Registrations</span>
         </div>
         <div class="d-flex align-items-center gap-3 bg-white bg-opacity-10 rounded-3 p-2 px-3 mb-2">
-          <i class="bi bi-robot fs-5"></i><span class="small">AI Event Assistant</span>
-        </div>
-        <div class="d-flex align-items-center gap-3 bg-white bg-opacity-10 rounded-3 p-2 px-3 mb-2">
-          <i class="bi bi-bell fs-5"></i><span class="small">Smart Email Notifications</span>
+          <i class="bi bi-book fs-5"></i><span class="small">Library and study services</span>
         </div>
         <div class="d-flex align-items-center gap-3 bg-white bg-opacity-10 rounded-3 p-2 px-3">
-          <i class="bi bi-people fs-5"></i><span class="small">3-Role Portal System</span>
+          <i class="bi bi-building fs-5"></i><span class="small">Campus spaces and support</span>
         </div>
       </div>
     </div>
 
     <div class="col-lg-7 bg-white p-4 p-md-5">
+      <div class="login-mobile-brand d-flex d-lg-none align-items-center gap-3 mb-4">
+        <img th:src="@{/images/cujammu_logo_circle.png}" src="/images/cujammu_logo_circle.png" alt="Central University of Jammu seal">
+        <div><div class="fw-bold">CUJAMMU PULSE</div><div class="small text-muted">Central University of Jammu</div></div>
+      </div>
       <div class="text-center mb-4">
         <h3 class="fw-bold">Welcome Back!</h3>
-        <p class="text-muted">Sign in to CUJAMMU EVENTHUB</p>
+        <p class="text-muted">Sign in to your campus workspace</p>
       </div>
 
       <div th:if="${errorMsg}" class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -97,6 +100,7 @@
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/theme-switcher.js"></script>
 <script>
 function togglePwd(){
   const i=document.getElementById('pwdInput'),e=document.getElementById('eyeIcon');

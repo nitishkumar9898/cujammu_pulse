@@ -23,31 +23,29 @@ public class GeminiAIService {
     @Value("${chatbot.ai.api-key:}")
     private String apiKey;
 
-    @Value("${chatbot.ai.model:gemini-2.0-flash}")
+    @Value("${chatbot.ai.model:}")
     private String model;
 
     @Value("${chatbot.ai.enabled:false}")
     private boolean enabled;
 
     private final ObjectMapper mapper = new ObjectMapper();
-    private final HttpClient httpClient = HttpClient.newBuilder()
-        .connectTimeout(Duration.ofSeconds(10))
-        .build();
+    private volatile HttpClient httpClient;
 
-    private static final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s";
+    private static final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent";
 
     /**
      * Send a prompt to Gemini and return the text response.
      * Returns null if API is unavailable or fails (caller should use fallback).
      */
     public String generateResponse(String systemPrompt, String userMessage) {
-        if (!enabled || apiKey == null || apiKey.isBlank()) {
+        if (!isAvailable()) {
             log.debug("Gemini AI disabled or no API key configured");
             return null;
         }
 
         try {
-            String url = String.format(GEMINI_URL, model, apiKey);
+            String url = String.format(GEMINI_URL, model);
 
             // Build Gemini API request body
             String requestBody = mapper.writeValueAsString(new java.util.LinkedHashMap<>() {{
@@ -71,15 +69,16 @@ public class GeminiAIService {
             HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("Content-Type", "application/json")
+                .header("x-goog-api-key", apiKey)
                 .timeout(Duration.ofSeconds(15))
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<byte[]> response = client().send(request,
+                    com.college.events.security.BoundedResponseBodyHandler.ofByteArray(64 * 1024));
 
             if (response.statusCode() != 200) {
-                log.warn("Gemini API returned status {}: {}", response.statusCode(),
-                    response.body().substring(0, Math.min(200, response.body().length())));
+                log.warn("Gemini API returned status {}", response.statusCode());
                 return null;
             }
 
@@ -99,13 +98,27 @@ public class GeminiAIService {
             log.warn("Gemini returned empty response");
             return null;
 
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            return null;
         } catch (Exception e) {
-            log.error("Gemini API call failed: {}", e.getMessage());
+            log.error("Gemini API call failed: {}", e.getClass().getSimpleName());
             return null;
         }
     }
 
     public boolean isAvailable() {
-        return enabled && apiKey != null && !apiKey.isBlank();
+        return enabled && apiKey != null && !apiKey.isBlank()
+                && model != null && model.matches("[A-Za-z0-9._-]{1,100}");
+    }
+
+    private synchronized HttpClient client() {
+        if (httpClient == null) httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+        return httpClient;
+    }
+
+    @jakarta.annotation.PreDestroy
+    public void close() {
+        if (httpClient != null) httpClient.close();
     }
 }

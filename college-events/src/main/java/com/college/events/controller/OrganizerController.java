@@ -27,9 +27,9 @@ import java.util.List;
 public class OrganizerController {
 
     private final EventService eventService;
+    private final EventScheduleService eventScheduleService;
     private final RegistrationService registrationService;
     private final CategoryService categoryService;
-    private final AttendanceService attendanceService;
     private final CsvExportService csvExportService;
     private final ExcelExportService excelExportService;
     private final EmailService emailService;
@@ -90,12 +90,12 @@ public class OrganizerController {
         }
         try {
             Event event = eventService.createEvent(dto, user);
-            auditService.logAction(user.getEmail(), user.getRole().name(), "EVENT_CREATED", "Event ID: " + event.getId() + ", Title: " + event.getTitle());
             redirectAttributes.addFlashAttribute("successMsg",
                 "✅ Event submitted for admin approval: " + event.getTitle());
             return "redirect:/organizer/events";
         } catch (Exception e) {
-            model.addAttribute("errorMsg", e.getMessage());
+            if (e instanceof org.springframework.security.access.AccessDeniedException denied) throw denied;
+            model.addAttribute("errorMsg", "Proposal could not be saved. Reload the form, check the fields and try again.");
             model.addAttribute("categories", categoryService.findAll());
             return "organizer/create-event";
         }
@@ -105,18 +105,16 @@ public class OrganizerController {
     public String showEditForm(@PathVariable Long id,
                                @AuthenticationPrincipal User user,
                                Model model) {
-        Event event = eventService.findById(id)
-            .orElseThrow(() -> new RuntimeException("Event not found"));
-        if (!event.getOrganizer().getId().equals(user.getId())) {
-            return "redirect:/organizer/events";
-        }
+        Event event = eventService.ownProposal(id, user);
 
         EventDto dto = new EventDto();
+        dto.setExpectedLifecycleVersion(event.getLifecycleVersion());
         dto.setTitle(event.getTitle());
         dto.setDescription(event.getDescription());
         dto.setCategoryId(event.getCategory() != null ? event.getCategory().getId() : null);
         dto.setVenue(event.getVenue());
         dto.setEventDate(event.getEventDate());
+        dto.setEventEndsAt(event.getEventEndsAt());
         dto.setMaxSeats(event.getMaxSeats());
         dto.setFees(event.getFees());
         dto.setContactEmail(event.getContactEmail());
@@ -138,20 +136,22 @@ public class OrganizerController {
                               @AuthenticationPrincipal User user,
                               RedirectAttributes redirectAttributes,
                               Model model) {
+        Event proposal = eventService.ownProposal(id, user);
+        model.addAttribute("event", proposal);
+        model.addAttribute("speakers", speakerService.getSpeakersForEvent(proposal));
+        model.addAttribute("sponsors", sponsorService.getSponsorsForEvent(proposal));
         if (result.hasErrors()) {
-            Event event = eventService.findById(id).orElseThrow();
-            model.addAttribute("event", event);
             model.addAttribute("categories", categoryService.findAll());
             return "organizer/edit-event";
         }
         try {
             eventService.updateEvent(id, dto, user);
-            auditService.logAction(user.getEmail(), user.getRole().name(), "EVENT_UPDATED", "Event ID: " + id);
             redirectAttributes.addFlashAttribute("successMsg",
                 "Event updated and resubmitted for approval.");
             return "redirect:/organizer/events";
         } catch (Exception e) {
-            model.addAttribute("errorMsg", e.getMessage());
+            if (e instanceof org.springframework.security.access.AccessDeniedException denied) throw denied;
+            model.addAttribute("errorMsg", "Proposal could not be saved. Reload the form, check the fields and try again.");
             model.addAttribute("categories", categoryService.findAll());
             return "organizer/edit-event";
         }
@@ -190,7 +190,7 @@ public class OrganizerController {
                               @AuthenticationPrincipal User user,
                               RedirectAttributes redirectAttributes) {
         try {
-            eventService.cancelEvent(id, user);
+            eventScheduleService.cancel(id);
             redirectAttributes.addFlashAttribute("successMsg",
                 "⚠️ Event cancelled. All registered students have been notified by email.");
         } catch (Exception e) {
@@ -221,7 +221,7 @@ public class OrganizerController {
                                   @AuthenticationPrincipal User user,
                                   RedirectAttributes redirectAttributes) {
         try {
-            eventService.postponeEvent(id, newDate, reason, user);
+            eventScheduleService.reschedule(id, newDate, reason);
             redirectAttributes.addFlashAttribute("successMsg",
                 "📅 Event postponed successfully. All registered students have been notified.");
         } catch (Exception e) {
@@ -254,31 +254,14 @@ public class OrganizerController {
     }
 
     @GetMapping("/events/{id}/scan")
-    public String scanPage(@PathVariable Long id,
-                           @AuthenticationPrincipal User user,
-                           Model model) {
-        Event event = eventService.findById(id)
-            .orElseThrow(() -> new RuntimeException("Event not found"));
-        if (!event.getOrganizer().getId().equals(user.getId())) {
-            return "redirect:/organizer/events";
-        }
-        long attended = registrationService.findByEvent(event).stream()
-            .filter(r -> r.getStatus() == com.college.events.model.RegistrationStatus.ATTENDED).count();
-        long registered = registrationService.countConfirmed(event);
-        model.addAttribute("event", event);
-        model.addAttribute("user", user);
-        model.addAttribute("attendedCount", attended);
-        model.addAttribute("registeredCount", registered);
-        return "organizer/scan-qr";
+    public String scanPage() {
+        return "redirect:/organizer/events";
     }
 
     @PostMapping("/events/{id}/scan")
     @ResponseBody
-    public java.util.Map<String, Object> processAttendanceScan(
-            @PathVariable Long id,
-            @RequestParam String token,
-            @AuthenticationPrincipal User user) {
-        return attendanceService.markAttendance(token, id, user);
+    public ResponseEntity<java.util.Map<String, Object>> processAttendanceScan() {
+        return ResponseEntity.status(409).body(java.util.Map.of("error", "Legacy QR attendance is disabled until owner-confirmed scan proof is available."));
     }
 
     @GetMapping("/events/{id}/export-csv")
@@ -329,15 +312,8 @@ public class OrganizerController {
             return "redirect:/organizer/events";
         }
 
-        List<String> emails = registrationService.findByEvent(event).stream()
-            .filter(r -> r.getStatus() == RegistrationStatus.REGISTERED
-                      || r.getStatus() == RegistrationStatus.ATTENDED)
-            .map(r -> r.getUser().getEmail())
-            .toList();
-
-        emailService.sendBulkAnnouncement(emails, event.getTitle(), announcementSubject, message);
-        redirectAttributes.addFlashAttribute("successMsg",
-            "📢 Announcement sent to " + emails.size() + " registered students.");
+        redirectAttributes.addFlashAttribute("warningMsg",
+            "Custom announcements are currently unavailable. No message was sent.");
         return "redirect:/organizer/events/" + id + "/registrations";
     }
 
@@ -378,6 +354,7 @@ public class OrganizerController {
                                  @RequestParam String currentPassword,
                                  @RequestParam String newPassword,
                                  @RequestParam String confirmNewPassword,
+                                 jakarta.servlet.http.HttpSession session,
                                  RedirectAttributes redirectAttributes) {
         if (!userService.checkPassword(user, currentPassword)) {
             redirectAttributes.addFlashAttribute("errorMsg", "Current password is incorrect.");
@@ -387,13 +364,15 @@ public class OrganizerController {
             redirectAttributes.addFlashAttribute("errorMsg", "New passwords do not match.");
             return "redirect:/organizer/profile";
         }
-        if (newPassword.length() < 8) {
-            redirectAttributes.addFlashAttribute("errorMsg", "Password must be at least 8 characters.");
+        try {
+            userService.changePassword(user, newPassword);
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());
             return "redirect:/organizer/profile";
         }
-        userService.changePassword(user, newPassword);
-        redirectAttributes.addFlashAttribute("successMsg", "Password changed successfully!");
-        return "redirect:/organizer/profile";
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        session.invalidate();
+        return "redirect:/login?passwordChanged=true";
     }
 
     // ─── SPEAKERS & SPONSORS ──────────────────────────────────────────────

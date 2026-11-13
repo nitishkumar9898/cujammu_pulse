@@ -3,185 +3,102 @@ package com.college.events.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 import java.security.SecureRandom;
-import java.time.LocalDateTime;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Secure OTP service with rate limiting, brute-force protection,
- * and automatic cleanup of expired entries.
- */
+/** Single-instance OTP guard. A distributed deployment requires shared atomic storage. */
 @Service
 @Slf4j
 public class OtpService {
-
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-    private static final int OTP_LENGTH = 6;
-    private static final int OTP_EXPIRY_MINUTES = 10;
     private static final int MAX_ATTEMPTS = 5;
-    private static final int MAX_OTP_REQUESTS_PER_WINDOW = 5;
-    private static final int RATE_LIMIT_WINDOW_MINUTES = 10;
-
-    // In-memory store – keyed by email
+    private static final int MAX_REQUESTS = 5;
+    private final Clock clock;
     private final Map<String, OtpEntry> otpStore = new ConcurrentHashMap<>();
     private final Map<String, RateLimitEntry> rateLimitStore = new ConcurrentHashMap<>();
 
-    /**
-     * Generate and store a new OTP for the given email.
-     * Returns the OTP string, or null if rate-limited.
-     */
+    public OtpService() { this(Clock.systemUTC()); }
+    OtpService(Clock clock) { this.clock = clock; }
+
     public String generateOtp(String email) {
-        String normalizedEmail = email.toLowerCase().trim();
-
-        // Rate limiting check
-        if (isRateLimited(normalizedEmail)) {
-            log.warn("OTP rate limit exceeded for email: {}", normalizedEmail);
-            return null;
-        }
-
-        String otp = generateSecureOtp();
-        OtpEntry entry = new OtpEntry(
-            otp,
-            LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES),
-            0
-        );
-        otpStore.put(normalizedEmail, entry);
-        incrementRateLimit(normalizedEmail);
-
-        log.info("OTP generated for {}: {} (expires at {})", normalizedEmail, otp, entry.expiresAt);
+        String key = normalize(email);
+        if (key == null) return null;
+        AtomicBoolean admitted = new AtomicBoolean();
+        rateLimitStore.compute(key, (ignored, previous) -> {
+            Instant now = clock.instant();
+            RateLimitEntry current = previous == null || !now.isBefore(previous.expiresAt())
+                    ? new RateLimitEntry(0, now.plusSeconds(600)) : previous;
+            if (current.count() >= MAX_REQUESTS) return current;
+            admitted.set(true);
+            return new RateLimitEntry(current.count() + 1, current.expiresAt());
+        });
+        if (!admitted.get()) return null;
+        String otp = String.format(Locale.ROOT, "%06d", SECURE_RANDOM.nextInt(1_000_000));
+        otpStore.put(key, new OtpEntry(otp, clock.instant().plusSeconds(600), 0));
+        log.info("OTP generated; credential and recipient omitted");
         return otp;
     }
 
-    /**
-     * Verify the provided OTP for the given email.
-     * Returns VerificationResult with success status and message.
-     */
+    /** Consumption and failed-attempt counting contend on the same account key. */
     public VerificationResult verifyOtp(String email, String otp) {
-        String normalizedEmail = email.toLowerCase().trim();
-        OtpEntry entry = otpStore.get(normalizedEmail);
-
-        if (entry == null) {
-            return new VerificationResult(false, "No OTP found. Please request a new one.");
-        }
-
-        if (entry.isExpired()) {
-            otpStore.remove(normalizedEmail);
-            return new VerificationResult(false, "OTP has expired. Please request a new one.");
-        }
-
-        if (entry.attempts >= MAX_ATTEMPTS) {
-            otpStore.remove(normalizedEmail);
-            return new VerificationResult(false, "Too many failed attempts. Please request a new OTP.");
-        }
-
-        if (!entry.otp.equals(otp.trim())) {
-            entry.attempts++;
-            int remaining = MAX_ATTEMPTS - entry.attempts;
-            log.warn("Invalid OTP attempt for {} ({} remaining)", normalizedEmail, remaining);
-            return new VerificationResult(false,
-                "Invalid OTP. " + remaining + " attempt(s) remaining.");
-        }
-
-        // Success — remove the OTP
-        otpStore.remove(normalizedEmail);
-        log.info("OTP verified successfully for {}", normalizedEmail);
-        return new VerificationResult(true, "OTP verified successfully.");
-    }
-
-    /**
-     * Get remaining seconds until OTP expiry for countdown display.
-     */
-    public long getRemainingSeconds(String email) {
-        OtpEntry entry = otpStore.get(email.toLowerCase().trim());
-        if (entry == null || entry.isExpired()) return 0;
-        return java.time.Duration.between(LocalDateTime.now(), entry.expiresAt).getSeconds();
-    }
-
-    /**
-     * Check if an active (non-expired) OTP exists for the email.
-     */
-    public boolean hasActiveOtp(String email) {
-        OtpEntry entry = otpStore.get(email.toLowerCase().trim());
-        return entry != null && !entry.isExpired();
-    }
-
-    /**
-     * Remove OTP entry (e.g., on registration cancellation).
-     */
-    public void invalidateOtp(String email) {
-        otpStore.remove(email.toLowerCase().trim());
-    }
-
-    // ─── Private helpers ─────────────────────────────────────────────────
-
-    private String generateSecureOtp() {
-        StringBuilder sb = new StringBuilder(OTP_LENGTH);
-        for (int i = 0; i < OTP_LENGTH; i++) {
-            sb.append(SECURE_RANDOM.nextInt(10));
-        }
-        return sb.toString();
-    }
-
-    private boolean isRateLimited(String email) {
-        RateLimitEntry rle = rateLimitStore.get(email);
-        if (rle == null) return false;
-        if (rle.isExpired()) {
-            rateLimitStore.remove(email);
-            return false;
-        }
-        return rle.count >= MAX_OTP_REQUESTS_PER_WINDOW;
-    }
-
-    private void incrementRateLimit(String email) {
-        rateLimitStore.compute(email, (k, v) -> {
-            if (v == null || v.isExpired()) {
-                return new RateLimitEntry(1, LocalDateTime.now().plusMinutes(RATE_LIMIT_WINDOW_MINUTES));
+        String key = normalize(email);
+        if (key == null) return missing();
+        AtomicReference<VerificationResult> result = new AtomicReference<>(missing());
+        otpStore.compute(key, (ignored, entry) -> {
+            Instant now = clock.instant();
+            if (entry == null) return null;
+            if (!now.isBefore(entry.expiresAt())) {
+                result.set(new VerificationResult(false, "OTP has expired. Please request a new one."));
+                return null;
             }
-            v.count++;
-            return v;
+            if (otp != null && entry.otp().equals(otp.trim())) {
+                result.set(new VerificationResult(true, "OTP verified successfully."));
+                return null;
+            }
+            int attempts = entry.attempts() + 1;
+            result.set(new VerificationResult(false,
+                    "Invalid OTP. " + (MAX_ATTEMPTS - attempts) + " attempt(s) remaining."));
+            return attempts >= MAX_ATTEMPTS ? null : new OtpEntry(entry.otp(), entry.expiresAt(), attempts);
         });
+        return result.get();
     }
 
-    /** Cleanup expired entries every 5 minutes */
+    public long getRemainingSeconds(String email) {
+        String key = normalize(email);
+        OtpEntry entry = key == null ? null : otpStore.get(key);
+        return entry == null ? 0 : Math.max(0, Duration.between(clock.instant(), entry.expiresAt()).getSeconds());
+    }
+    public boolean hasActiveOtp(String email) {
+        String key = normalize(email);
+        OtpEntry entry = key == null ? null : otpStore.get(key);
+        return entry != null && clock.instant().isBefore(entry.expiresAt());
+    }
+    public void invalidateOtp(String email) {
+        String key = normalize(email);
+        if (key != null) otpStore.remove(key);
+    }
     @Scheduled(fixedRate = 300_000)
     public void cleanupExpiredEntries() {
-        otpStore.entrySet().removeIf(e -> e.getValue().isExpired());
-        rateLimitStore.entrySet().removeIf(e -> e.getValue().isExpired());
+        Instant now = clock.instant();
+        // Conditional removal never deletes a replacement issued after this snapshot.
+        otpStore.forEach((key, value) -> { if (!now.isBefore(value.expiresAt())) otpStore.remove(key, value); });
+        rateLimitStore.forEach((key, value) -> { if (!now.isBefore(value.expiresAt())) rateLimitStore.remove(key, value); });
     }
-
-    // ─── Inner classes ───────────────────────────────────────────────────
-
-    private static class OtpEntry {
-        final String otp;
-        final LocalDateTime expiresAt;
-        int attempts;
-
-        OtpEntry(String otp, LocalDateTime expiresAt, int attempts) {
-            this.otp = otp;
-            this.expiresAt = expiresAt;
-            this.attempts = attempts;
-        }
-
-        boolean isExpired() {
-            return LocalDateTime.now().isAfter(expiresAt);
-        }
+    private static String normalize(String email) {
+        if (email == null || email.isBlank() || email.length() > 254) return null;
+        return email.trim().toLowerCase(Locale.ROOT);
     }
-
-    private static class RateLimitEntry {
-        int count;
-        final LocalDateTime windowEnd;
-
-        RateLimitEntry(int count, LocalDateTime windowEnd) {
-            this.count = count;
-            this.windowEnd = windowEnd;
-        }
-
-        boolean isExpired() {
-            return LocalDateTime.now().isAfter(windowEnd);
-        }
+    private static VerificationResult missing() {
+        return new VerificationResult(false, "No OTP found. Please request a new one.");
     }
-
+    private record OtpEntry(String otp, Instant expiresAt, int attempts) {}
+    private record RateLimitEntry(int count, Instant expiresAt) {}
     public record VerificationResult(boolean success, String message) {}
 }

@@ -28,4 +28,7 @@ public class Sponsor {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
     private Event event;
+
+    public String getSafeWebsiteUrl() { return com.college.events.security.WebUrlPolicy.safeHttpUrl(websiteUrl); }
+    public String getSafeLogoUrl() { return com.college.events.security.WebUrlPolicy.safeHttpUrl(logoUrl); }
 }

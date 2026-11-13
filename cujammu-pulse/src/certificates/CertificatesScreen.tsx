@@ -1,0 +1,14 @@
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Linking, Platform, Text, View } from 'react-native';
+import { api, ApiError } from '../api';
+import type { IssuedCertificate } from './contracts';
+import { Body, Button, Heading, Panel } from '../ui';
+
+export function CertificatesScreen({ onSessionExpired }: { onSessionExpired: () => void }) {
+  const [items, setItems] = useState<IssuedCertificate[]>([]); const [page, setPage] = useState(0); const [hasNext, setHasNext] = useState(false); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const [revision, setRevision] = useState(0);
+  useEffect(() => { const controller = new AbortController(); setLoading(true); setItems([]); setError(''); void api.myCertificates(page, controller.signal).then(result => { if (!controller.signal.aborted) { if (result.page !== page) throw new Error('Certificate page changed. Refresh before continuing.'); setItems(result.items); setHasNext(result.hasNext); } }).catch(e => { if (!controller.signal.aborted) { if (e instanceof ApiError && e.status === 401) onSessionExpired(); else setError(e instanceof Error ? e.message : 'Issued certificates could not be loaded.'); } }).finally(() => { if (!controller.signal.aborted) setLoading(false); }); return () => controller.abort(); }, [onSessionExpired, page, revision]);
+  return <Panel><Heading>Issued certificates</Heading><Body>Only certificates already issued by the university service appear here. Point participation records attendance evidence at a checkpoint; it does not certify duration or volunteer hours.</Body>{error ? <Text accessibilityRole="alert">{error}</Text> : null}<Button label="Refresh certificates" secondary disabled={loading} onPress={() => setRevision(x => x + 1)} />
+    {loading ? <ActivityIndicator accessibilityLabel="Loading issued certificates" /> : items.length === 0 ? <Body>No issued certificates are available on this page.</Body> : items.map(item => <View key={item.registrationId} style={{ gap: 6 }}><Heading>{item.eventTitle}</Heading><Body>Point participation · {item.certificateNumber}</Body><Body>Issued {new Date(item.issuedAt).toLocaleString()}</Body>{Platform.OS === 'web' ? <Button actionId="certificates.download" label="Download issued PDF" onPress={() => void Linking.openURL(item.downloadUrl).catch(() => setError('Certificate download could not be opened.'))} /> : <Body>Secure PDF download is unavailable on this device until its private document adapter is verified.</Body>}</View>)}
+    <Body>Page {page + 1}</Body><Button label="Previous certificates" secondary disabled={loading || page === 0} onPress={() => setPage(x => x - 1)} /><Button label="Next certificates" secondary disabled={loading || !hasNext} onPress={() => setPage(x => x + 1)} />
+  </Panel>;
+}

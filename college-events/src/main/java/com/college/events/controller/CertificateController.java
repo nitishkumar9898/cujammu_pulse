@@ -35,15 +35,11 @@ public class CertificateController {
             return ResponseEntity.status(403).build();
         }
 
-        // Attendance check
-        if (reg.getStatus() != RegistrationStatus.ATTENDED) {
-            throw new RuntimeException("Certificate is only available after attendance is marked.");
-        }
-
         byte[] pdfBytes = certificateService.generateCertificatePdf(reg);
-        String filename = reg.getEvent().getTitle().replaceAll("\\s+", "_") + "_Certificate.pdf";
+        String filename = "point-attendance-certificate.pdf";
 
         return ResponseEntity.ok()
+            .cacheControl(org.springframework.http.CacheControl.noStore())
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
             .contentType(MediaType.APPLICATION_PDF)
             .body(pdfBytes);

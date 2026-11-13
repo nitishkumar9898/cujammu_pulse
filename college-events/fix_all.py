@@ -51,3 +51,4 @@ if os.path.exists(f5):
     with open(f5, 'w', encoding='utf-8') as f: f.write(content)
 
 print("done html fixes")
+

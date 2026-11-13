@@ -9,11 +9,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping
@@ -28,35 +27,49 @@ public class NotificationController {
         return "notifications/index";
     }
 
-    @GetMapping("/api/notifications/read-all")
-    public String markAllAsRead(@AuthenticationPrincipal User user, HttpServletRequest request) {
+    @PostMapping("/api/notifications/read-all")
+    public String markAllAsRead(@AuthenticationPrincipal User user) {
         if (user != null) {
             notificationService.markAllAsRead(user);
         }
-        String referer = request.getHeader("Referer");
-        return "redirect:" + (referer != null && !referer.isBlank() ? referer : "/notifications");
+        return "redirect:/notifications";
     }
 
-    @GetMapping("/api/notifications/{id}/open")
+    @PostMapping("/api/notifications/{id}/open")
     public String openNotification(@PathVariable Long id,
-                                   @AuthenticationPrincipal User user,
-                                   HttpServletRequest request) {
+                                   @AuthenticationPrincipal User user) {
         if (user != null) {
             notificationService.markAsRead(id, user);
         }
 
-        String fallback = request.getHeader("Referer");
         Notification target = user != null
             ? notificationService.getRecent(user).stream().filter(notification -> notification.getId().equals(id)).findFirst().orElse(null)
             : null;
-        String actionUrl = target != null && target.getActionUrl() != null && !target.getActionUrl().isBlank()
-            ? target.getActionUrl()
-            : (fallback != null && !fallback.isBlank() ? fallback : "/notifications");
-        return "redirect:" + actionUrl;
+        return "redirect:" + safeDestination(target != null ? target.getActionUrl() : null);
+    }
+
+    /** Only known read-only landing pages may be reached by persisted legacy links.
+     * No query, encoded separator, authority, dot segment or response header can
+     * turn an inbox action into an external redirect or another mutation endpoint.
+     */
+    private static String safeDestination(String actionUrl) {
+        if (actionUrl != null && actionUrl.matches(
+                "/(?:notifications|app/?|venues|hostel|student/my-tickets|"
+                + "(?:student/)?events/[1-9][0-9]*(?:/attendance)?|"
+                + "organizer/events/[1-9][0-9]*(?:/registrations)?)")) {
+            return actionUrl;
+        }
+        return "/notifications";
     }
 
     @GetMapping("/api/notifications/stream")
     public SseEmitter stream(@AuthenticationPrincipal User user) {
         return notificationService.subscribe(user);
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(NotificationService.StreamCapacityException.class)
+    public org.springframework.http.ResponseEntity<Void> streamCapacityReached() {
+        return org.springframework.http.ResponseEntity.status(429).header("Retry-After", "60")
+                .cacheControl(org.springframework.http.CacheControl.noStore()).build();
     }
 }

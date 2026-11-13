@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "CUJAMMU PULSE",
+    "slug": "cujammu-pulse",
+    "version": "0.1.0",
+    "icon": "./assets/cujammu-logo.png",
+    "scheme": "in.ac.cujammu.pulse",
+    "plugins": [
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true
+        }
+      ],
+      "expo-web-browser",
+      "expo-sharing"
+    ],
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "android": {
+      "package": "in.ac.cujammu.pulse",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/cujammu-logo.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "name": "CUJAMMU PULSE"
+    },
+    "experiments": {
+      "baseUrl": "/app"
+    }
+  }
+}

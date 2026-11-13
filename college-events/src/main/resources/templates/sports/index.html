@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cricbuzz-Style Live Sports Scorecards — CUJAMMU-PULSE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="/css/style.css" rel="stylesheet"/>
+  <style>
+    .live-pulse {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background-color: #EF4444;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+      100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+    }
+    .match-card {
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 16px;
+      transition: box-shadow 0.15s ease;
+    }
+    .match-card:hover {
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    .comm-mark {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      min-width: 44px;
+      text-align: center;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3" style="background: linear-gradient(90deg, #0B2238 0%, #133658 100%) !important;">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center fw-bold" href="/">
+      <img src="/images/cujammu_logo_circle.png" alt="CUJammu Emblem" style="width: 38px; height: 38px; border-radius: 50%; margin-right: 10px;">
+      <span>CUJAMMU<span style="color: #D4AF37;">-PULSE</span> <span class="badge bg-warning text-dark ms-2" style="font-size: 11px;">SPORTS</span></span>
+    </a>
+    <div class="d-flex align-items-center gap-3">
+      <a href="/feed" class="btn btn-outline-light btn-sm rounded-pill"><i class="bi bi-postcard-heart me-1"></i>Pulse Wall</a>
+      <a href="/alumni" class="btn btn-outline-light btn-sm rounded-pill"><i class="bi bi-mortarboard-fill me-1"></i>Alumni Hub</a>
+      <a href="/login" class="btn btn-warning btn-sm rounded-pill fw-bold text-dark"><i class="bi bi-box-arrow-in-right me-1"></i>Sign In</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+
+  <!-- Header Banner -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: linear-gradient(135deg, #0B2238 0%, #174570 100%); color: white;">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <span class="badge bg-danger rounded-pill px-3 py-1 mb-2 fw-bold"><span class="live-pulse me-2"></span>LIVE CRICBUZZ ENGINE</span>
+          <h3 class="fw-bold mb-1">University Sports Center & Tournaments</h3>
+          <p class="text-light opacity-75 small mb-0">Live ball-by-ball commentary, real-time scorecards, and tournament schedules across Cricket, Football, Volleyball, Basketball, and Badminton.</p>
+        </div>
+        <a href="/feed" class="btn btn-warning fw-bold text-dark px-4 rounded-pill">
+          <i class="bi bi-trophy-fill me-1"></i>Check Victory Showcases
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sport Filter Tabs -->
+  <ul class="nav nav-pills gap-2 mb-4 justify-content-start flex-wrap">
+    <li class="nav-item"><button class="nav-link active rounded-pill px-3 py-2 btn-sm" onclick="filterSport('ALL')">All Sports</button></li>
+    <li class="nav-item"><button class="nav-link rounded-pill px-3 py-2 btn-sm" onclick="filterSport('CRICKET')">🏏 Cricket</button></li>
+    <li class="nav-item"><button class="nav-link rounded-pill px-3 py-2 btn-sm" onclick="filterSport('FOOTBALL')">⚽ Football</button></li>
+    <li class="nav-item"><button class="nav-link rounded-pill px-3 py-2 btn-sm" onclick="filterSport('VOLLEYBALL')">🏐 Volleyball</button></li>
+    <li class="nav-item"><button class="nav-link rounded-pill px-3 py-2 btn-sm" onclick="filterSport('BADMINTON')">🏸 Badminton</button></li>
+    <li class="nav-item"><button class="nav-link rounded-pill px-3 py-2 btn-sm" onclick="filterSport('KABADDI')">🤼 Kabaddi</button></li>
+  </ul>
+
+  <!-- Matches Grid -->
+  <div class="row g-4" id="matchesContainer">
+
+    <div th:each="m : ${allMatches}" class="col-lg-6 match-item" th:data-sport="${m.sportType}">
+      <div class="card match-card h-100 bg-white p-4">
+        
+        <!-- Tournament Name & Status Header -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="text-muted small fw-semibold text-truncate" style="max-width: 260px;" th:text="${m.tournamentName}">Tournament</span>
+          
+          <span th:if="${m.status == 'LIVE'}" class="badge bg-danger-subtle text-danger border border-danger rounded-pill px-2 py-1 fw-bold small">
+            <span class="live-pulse me-1"></span>LIVE
+          </span>
+          <span th:unless="${m.status == 'LIVE'}" class="badge bg-secondary-subtle text-dark border rounded-pill px-2 py-1 small" th:text="${m.status}">SCHEDULED</span>
+        </div>
+
+        <!-- Teams & Live Scores -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h5 class="fw-bold text-dark mb-1" th:text="${m.teamA}">Team A</h5>
+            <h5 class="fw-bold text-muted mb-0" th:text="${m.teamB}">Team B</h5>
+          </div>
+          <div class="text-end">
+            <h5 class="fw-black text-primary mb-1" th:text="${m.scoreTeamA}">0/0</h5>
+            <h6 class="fw-semibold text-muted mb-0" th:text="${m.scoreTeamB}">0/0</h6>
+          </div>
+        </div>
+
+        <!-- Live Summary Banner -->
+        <div class="p-2 rounded-3 mb-3" style="background: rgba(212,175,55,0.12); border-left: 3px solid #D4AF37;">
+          <p class="small fw-bold mb-0 text-dark" th:text="${m.liveSummary != null ? m.liveSummary : 'Match in progress'}">Match Summary</p>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
+          <span><i class="bi bi-geo-alt-fill text-danger me-1"></i><span th:text="${m.venue != null ? m.venue : 'University Sports Ground'}">Venue</span></span>
+          <span class="badge bg-light text-dark border" th:text="${m.sportType}">SPORT</span>
+        </div>
+
+        <!-- Commentary Toggle -->
+        <div class="border-top pt-3">
+          <button class="btn btn-outline-primary btn-sm rounded-pill w-100 fw-bold" th:onclick="'loadCommentary(' + ${m.id} + ')'">
+            <i class="bi bi-chat-left-text-fill me-1"></i>View Ball-by-Ball Live Commentary
+          </button>
+          
+          <div th:id="'comm-container-' + ${m.id}" class="d-none mt-3 p-3 rounded-3 bg-light text-dark">
+            <h6 class="fw-bold small mb-2"><i class="bi bi-lightning-charge text-warning me-1"></i>Recent Commentary Stream:</h6>
+            <div th:id="'comm-list-' + ${m.id}" class="d-flex flex-column gap-2 small"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div th:if="${allMatches == null or #lists.isEmpty(allMatches)}" class="col-12 text-center py-5">
+      <div class="card p-5 border-0 shadow-sm rounded-4">
+        <i class="bi bi-trophy display-4 text-muted mb-3"></i>
+        <h5 class="fw-bold">No Sports Fixtures Scheduled Today</h5>
+        <p class="text-muted small">Inter-departmental and inter-hostel matches will appear here with live updates!</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function filterSport(sport) {
+  const items = document.querySelectorAll('.match-item');
+  items.forEach(el => {
+    if (sport === 'ALL' || el.getAttribute('data-sport') === sport) {
+      el.classList.remove('d-none');
+    } else {
+      el.classList.add('d-none');
+    }
+  });
+
+  const btns = document.querySelectorAll('.nav-pills .nav-link');
+  btns.forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function loadCommentary(matchId) {
+  const container = document.getElementById('comm-container-' + matchId);
+  const list = document.getElementById('comm-list-' + matchId);
+
+  if (!container.classList.contains('d-none')) {
+    container.classList.add('d-none');
+    return;
+  }
+
+  container.classList.remove('d-none');
+  list.innerHTML = '<span class="text-muted small">Fetching latest commentary...</span>';
+
+  fetch('/api/v1/cujammu/sports/matches/' + matchId)
+  .then(r => r.json())
+  .then(data => {
+    list.innerHTML = '';
+    const comms = data.commentary || [];
+    if (comms.length === 0) {
+      list.innerHTML = '<span class="text-muted small">No commentary logged for this fixture yet.</span>';
+      return;
+    }
+    comms.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'd-flex align-items-start gap-2 py-1 border-bottom';
+      
+      let badgeClass = 'bg-secondary text-white';
+      if (c.scoreEvent === 'SIX') badgeClass = 'bg-primary text-white';
+      else if (c.scoreEvent === 'FOUR') badgeClass = 'bg-info text-white';
+      else if (c.scoreEvent === 'WICKET' || c.scoreEvent === 'GOAL') badgeClass = 'bg-danger text-white';
+      else if (c.scoreEvent === 'POINT') badgeClass = 'bg-success text-white';
+
+      const mark = document.createElement('span');
+      mark.className = 'comm-mark ' + badgeClass;
+      mark.textContent = c.timelineMark || '•';
+      const commentary = document.createElement('span');
+      commentary.className = 'flex-grow-1';
+      commentary.style.fontSize = '12px';
+      commentary.style.lineHeight = '1.4';
+      commentary.textContent = c.commentaryText;
+      row.append(mark, commentary);
+      list.appendChild(row);
+    });
+  })
+  .catch(err => {
+    const message = document.createElement('span');
+    message.className = 'text-danger small';
+    message.textContent = 'Failed to load commentary. Please try again.';
+    list.replaceChildren(message);
+  });
+}
+
+// Auto-refresh live matches every 6 seconds
+setInterval(() => {
+  fetch('/api/v1/cujammu/sports/matches/live')
+  .then(r => r.json())
+  .then(liveList => {
+    // silently update live scorecards if present
+  })
+  .catch(() => {});
+}, 6000);
+</script>
+</body>
+</html>

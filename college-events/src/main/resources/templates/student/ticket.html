@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>QR Ticket — CUJAMMU EVENTHUB</title>
+<title>QR Ticket — CUJAMMU PULSE</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 <link href="/css/style.css" rel="stylesheet"/>
@@ -27,7 +27,7 @@
       <div class="ticket-header">
         <div class="d-flex justify-content-between align-items-start">
           <div>
-            <p class="small opacity-75 mb-1"><i class="bi bi-calendar-event-fill me-1"></i>CUJAMMU EVENTHUB · Entry Pass</p>
+            <p class="small opacity-75 mb-1"><i class="bi bi-calendar-event-fill me-1"></i>CUJAMMU PULSE · Entry Pass</p>
             <h4 class="fw-bold mb-0" th:text="${registration.event.title}">Event Title</h4>
           </div>
           <span class="badge bg-white text-success fw-bold"
@@ -39,8 +39,30 @@
 
       <!-- Body -->
       <div class="ticket-body">
-        <!-- QR Code -->
-        <div class="text-center mb-3">
+        <!-- QR Pass Display (Dual QR vs Single QR vs No QR / Manual) -->
+        <div th:if="${registration.event.ticketQrMode != null and registration.event.ticketQrMode.name() == 'NO_QR'}" class="text-center p-3 border rounded-3 bg-light mb-3">
+          <i class="bi bi-person-badge-fill fs-1 text-primary"></i>
+          <h6 class="fw-bold mt-2 mb-1">OFFICIAL UNIVERSITY DELEGATE PASS</h6>
+          <span class="badge bg-warning text-dark px-3 py-1">MANUAL ROLL-CALL — NO QR CODE</span>
+          <p class="small text-muted mt-2 mb-0">Organizer set Gate Entry to Manual Verification. Please present your Student ID Card at entrance.</p>
+        </div>
+
+        <div th:if="${registration.event.ticketQrMode != null and registration.event.ticketQrMode.name() == 'DUAL_QR'}" class="text-center mb-3">
+          <span class="badge bg-primary px-3 py-1 mb-2">⚡ DUAL-QR ANTI-PASSBACK ACTIVE</span>
+          <div class="d-flex justify-content-center gap-3">
+            <div class="qr-wrapper p-2 border rounded-3 bg-light">
+              <img th:src="${qrDataUri}" alt="Entry QR" class="rounded-2 border p-1" style="width:130px;height:130px;"/>
+              <div class="small fw-bold text-success mt-1">QR-1 ENTRY PASS</div>
+            </div>
+            <div class="qr-wrapper p-2 border rounded-3 bg-light">
+              <img th:src="${qrDataUri}" alt="Exit QR" class="rounded-2 border p-1" style="width:130px;height:130px;"/>
+              <div class="small fw-bold text-info mt-1">QR-2 EXIT PASS</div>
+            </div>
+          </div>
+          <p class="text-muted small mt-2 mb-0">Scan QR-1 on entrance and QR-2 on departure to verify your participation.</p>
+        </div>
+
+        <div th:if="${registration.event.ticketQrMode == null or (registration.event.ticketQrMode.name() != 'NO_QR' and registration.event.ticketQrMode.name() != 'DUAL_QR')}" class="text-center mb-3">
           <div class="qr-wrapper">
             <img th:src="${qrDataUri}" alt="QR Code" class="rounded-3 border p-1"/>
           </div>
@@ -72,10 +94,8 @@
             <div class="text-muted ticket-label">Venue</div>
             <div class="fw-semibold small" th:text="${registration.event.venue}">Venue</div>
           </div>
-          <div class="col-12">
-            <div class="text-muted ticket-label">Token</div>
-            <code class="small token-break"
-                  th:text="${registration.qrToken}">token</code>
+          <div class="col-12 text-muted small text-center">
+            Secure event-pass display is unavailable in this release.
           </div>
         </div>
 

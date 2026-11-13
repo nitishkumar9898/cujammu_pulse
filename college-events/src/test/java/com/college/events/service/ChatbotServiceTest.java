@@ -112,33 +112,33 @@ class ChatbotServiceTest {
     class UpcomingEvents {
 
         @Test void shouldHandleNoUpcomingEvents() {
-            when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of());
+            when(eventRepository.findUpcomingApprovedEvents(any(), any())).thenReturn(List.of());
             String response = chatbotService.processMessage("What events are coming up?");
             assertThat(response).contains("No upcoming events");
         }
 
         @Test void shouldListUpcomingEvents() {
             Event event = mockEvent("AI Workshop", "Seminar Hall A");
-            when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of(event));
+            when(eventRepository.findUpcomingApprovedEvents(any(), any())).thenReturn(List.of(event));
             String response = chatbotService.processMessage("upcoming events");
             assertThat(response).contains("AI Workshop");
             assertThat(response).contains("Seminar Hall A");
         }
 
         @Test void shouldHandleHindiUpcomingQuery() {
-            when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of());
+            when(eventRepository.findUpcomingApprovedEvents(any(), any())).thenReturn(List.of());
             String response = chatbotService.processMessage("Kaunse events aa rahe hain?");
             assertThat(response).contains("upcoming event nahi hai");
         }
 
         @Test void shouldHandleHindiUpcomingQuery2() {
-            when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of());
+            when(eventRepository.findUpcomingApprovedEvents(any(), any())).thenReturn(List.of());
             String response = chatbotService.processMessage("Aane wale event dikha do");
             assertThat(response).containsAnyOf("upcoming event", "Aane Wale Events");
         }
 
         @Test void shouldHandleHindiUpcomingQuery3() {
-            when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of());
+            when(eventRepository.findUpcomingApprovedEvents(any(), any())).thenReturn(List.of());
             String response = chatbotService.processMessage("Koi event hai kya?");
             assertThat(response).containsAnyOf("event", "Events");
         }
@@ -155,7 +155,7 @@ class ChatbotServiceTest {
         @Test void shouldShowEventStats() {
             when(eventRepository.count()).thenReturn(5L);
             when(eventRepository.countByStatus(EventStatus.APPROVED)).thenReturn(3L);
-            when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of());
+            when(eventRepository.countByStatusAndEventDateAfter(org.mockito.ArgumentMatchers.eq(EventStatus.APPROVED), any())).thenReturn(2L);
             String response = chatbotService.processMessage("How many events are there?");
             assertThat(response).contains("Event Statistics");
             assertThat(response).contains("5");
@@ -164,7 +164,7 @@ class ChatbotServiceTest {
         @Test void shouldShowHindiStats() {
             when(eventRepository.count()).thenReturn(2L);
             when(eventRepository.countByStatus(EventStatus.APPROVED)).thenReturn(1L);
-            when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of());
+            when(eventRepository.countByStatusAndEventDateAfter(org.mockito.ArgumentMatchers.eq(EventStatus.APPROVED), any())).thenReturn(1L);
             String response = chatbotService.processMessage("Kitne event hain?");
             assertThat(response).contains("2");
         }
@@ -229,12 +229,14 @@ class ChatbotServiceTest {
 
         @Test void shouldExplainQRTickets() {
             String response = chatbotService.processMessage("Where is my QR ticket?");
-            assertThat(response).contains("QR Tickets");
+            assertThat(response).contains("My Tickets", "Secure event-pass display is not enabled")
+                    .doesNotContain("QR Tickets", "qrToken");
         }
 
         @Test void shouldExplainQRHindi() {
             String response = chatbotService.processMessage("Mera ticket kahan hai?");
-            assertThat(response).contains("QR Tickets");
+            assertThat(response).contains("My Tickets", "Secure event-pass display is not enabled")
+                    .doesNotContain("QR Tickets", "qrToken");
         }
     }
 
@@ -248,14 +250,14 @@ class ChatbotServiceTest {
 
         @Test void shouldShowVenues() {
             Event event = mockEvent("Tech Talk", "Auditorium B");
-            when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of(event));
+            when(eventRepository.findUpcomingApprovedEvents(any(), any())).thenReturn(List.of(event));
             String response = chatbotService.processMessage("Where is the event?");
             assertThat(response).contains("Venues");
             assertThat(response).contains("Auditorium B");
         }
 
         @Test void shouldShowVenuesHindi() {
-            when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of());
+            when(eventRepository.findUpcomingApprovedEvents(any(), any())).thenReturn(List.of());
             String response = chatbotService.processMessage("Event kahan hai?");
             assertThat(response).containsIgnoringCase("event");
         }
@@ -270,13 +272,13 @@ class ChatbotServiceTest {
     class TodayEvents {
 
         @Test void shouldHandleNoTodayEvents() {
-            when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of());
+            when(eventRepository.findApprovedEventsInDay(any(), any(), any())).thenReturn(List.of());
             String response = chatbotService.processMessage("Any events today?");
             assertThat(response).containsIgnoringCase("today");
         }
 
         @Test void shouldHandleHindiToday() {
-            when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of());
+            when(eventRepository.findApprovedEventsInDay(any(), any(), any())).thenReturn(List.of());
             String response = chatbotService.processMessage("Aaj koi event hai?");
             assertThat(response).containsAnyOf("today", "Today", "aaj", "Aaj", "nahi hai");
         }
@@ -293,13 +295,13 @@ class ChatbotServiceTest {
         @Test void shouldShowFreeEvents() {
             Event freeEvent = mockEvent("Free Talk", "Room 101");
             freeEvent.setFees(0.0);
-            when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of(freeEvent));
+            when(eventRepository.findUpcomingFreeApprovedEvents(any(), any())).thenReturn(List.of(freeEvent));
             String response = chatbotService.processMessage("Show me free events");
             assertThat(response).contains("Free Events");
         }
 
         @Test void shouldShowFreeHindi() {
-            when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of());
+            when(eventRepository.findUpcomingFreeApprovedEvents(any(), any())).thenReturn(List.of());
             String response = chatbotService.processMessage("Muft events dikha do");
             assertThat(response).containsAnyOf("free", "Free", "muft");
         }
@@ -324,7 +326,7 @@ class ChatbotServiceTest {
             "Any quiz competitions?, Quiz"
         })
         void shouldQueryByCategory(String question, String expectedCategory) {
-            org.mockito.Mockito.lenient().when(eventRepository.findUpcomingApprovedEvents(any())).thenReturn(List.of());
+            org.mockito.Mockito.lenient().when(eventRepository.findUpcomingApprovedEvents(any(), any())).thenReturn(List.of());
             String response = chatbotService.processMessage(question);
             assertThat(response).containsIgnoringCase(expectedCategory);
         }

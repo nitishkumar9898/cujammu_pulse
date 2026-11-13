@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="_csrf" th:content="${_csrf.token}"><meta name="_csrf_header" th:content="${_csrf.headerName}">
+<title>Private support | CUJAMMU-PULSE</title>
+<style>
+:root{color-scheme:light dark;--bg:#f3f6fb;--card:#fff;--ink:#172941;--line:#c5d3e3;--accent:#215388}*{box-sizing:border-box}
+@media(prefers-color-scheme:dark){:root{--bg:#101b2a;--card:#1c2d43;--ink:#f0f5fc;--line:#637891;--accent:#a0d0ff}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,sans-serif}header,main{max-width:1150px;padding:24px;margin:auto}header{display:flex;gap:20px;align-items:center;flex-wrap:wrap}header img{width:40px;height:40px;border-radius:50%}a{color:var(--accent)}h1{font-size:clamp(2rem,4vw,3rem);line-height:1.15}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:18px}.panel{padding:24px;border:1px solid var(--line);background:var(--card);border-radius:20px;margin:18px 0}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}label{display:block;margin:12px 0}input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;cursor:pointer}button:disabled{opacity:.6;cursor:wait}.primary{background:#215388;color:#fff}:focus-visible{outline:3px solid var(--accent);outline-offset:3px}[hidden]{display:none!important}.notice{border-left:4px solid var(--accent);padding:12px}.meta{opacity:.8}.message{padding:16px 0;border-bottom:1px solid var(--line);white-space:pre-wrap}fieldset{border:1px solid var(--line);border-radius:14px;margin:20px 0}
+</style></head>
+<body th:attr="data-admin=${canAdmin}"><header><img src="/images/cujammu_logo_circle.png" alt="CUJammu"><strong>CUJAMMU-PULSE</strong><a href="/">University home</a><a href="/notifications">Notifications</a></header>
+<main><p class="meta">SUPPORT / PRIVATE CONVERSATIONS</p><h1>Help, with a clear next step.</h1><p>Ticket intake is available around the clock. Response times depend on university staffing. For immediate danger, use your university's emergency contact channel.</p>
+<p id="notice" role="status" aria-live="polite" class="notice" hidden></p>
+<nav class="toolbar" aria-label="Helpdesk views"><button data-view="mine">My tickets</button><button data-view="assigned" th:if="${canSupport}">Assigned to me</button><button data-view="all" th:if="${canAdmin}">Support queue</button><button id="newTicket">Open ticket</button></nav>
+<section id="listSection"><h2 id="listHeading">My tickets</h2><div id="ticketList" class="grid"></div><div id="listPager" class="toolbar"></div></section>
+<section id="createSection" hidden><h2>Open a private ticket</h2><form id="createForm" class="panel">
+<label>Subject<input name="subject" maxlength="150" required></label><label>Description<textarea name="description" maxlength="4000" rows="5" required></textarea></label>
+<div class="grid"><label>Category<select name="category"><option value="GENERAL">General support</option><option value="EVENT_REGISTRATION">Event registration</option><option value="LIBRARY_PASS">Library</option><option value="HOSTEL_LEAVE">Hostel</option><option value="CERTIFICATE_ISSUE">Certificate</option><option value="TECH_SUPPORT">Technical support</option></select></label>
+<label>Requested urgency<select name="requestedPriority"><option>LOW</option><option selected>MEDIUM</option><option>HIGH</option><option>URGENT</option></select></label></div>
+<p class="meta">Your requested urgency informs triage. Authorized support staff set the effective priority.</p><button class="primary">Submit ticket</button></form></section>
+<section id="detailSection" hidden><h2 id="ticketTitle"></h2><div id="ticketDetails" class="panel"></div><button id="refreshTicket">Refresh conversation</button>
+<h3>Private thread and timeline</h3><div id="thread" class="panel"></div><div id="threadPager" class="toolbar"></div>
+<form id="replyForm" class="panel"><label>Reply<textarea name="body" maxlength="4000" rows="3" required></textarea></label><button class="primary">Send private reply</button></form>
+<form id="ownerActionForm" class="panel"><label>Reason<textarea name="reason" maxlength="2000" rows="2" required></textarea></label><div class="toolbar"><button name="action" value="escalate">Request escalation</button><button name="action" value="reopen">Reopen ticket</button></div></form>
+<form id="triageForm" class="panel" hidden><h3>Support triage</h3><div class="grid">
+<label>Status<select name="status"><option>OPEN</option><option>IN_PROGRESS</option><option>RESOLVED</option><option>CLOSED</option></select></label>
+<label>Effective priority<select name="priority"><option>LOW</option><option>MEDIUM</option><option>HIGH</option><option>URGENT</option></select></label>
+<label>Assigned office<select name="assignedOffice"><option value="STUDENT_AFFAIRS">Student affairs</option><option value="TECHNICAL">Technical</option><option value="LIBRARY">Library</option><option value="HOSTEL">Hostel</option><option value="EXAMINATION">Examination</option><option value="EVENTS">Events</option></select></label>
+<label>Assigned support account ID (optional)<input name="assignedStaffId" type="number" min="1"></label></div>
+<label>Resolution notes<textarea name="resolutionNotes" maxlength="2000" rows="3"></textarea></label><p class="meta">Progress: Open → In progress → Resolved → Closed. Resolution notes are required to resolve or close. Only administrators may reassign.</p><button class="primary">Save triage decision</button></form>
+</section></main><script src="/js/helpdesk.js" defer></script></body></html>

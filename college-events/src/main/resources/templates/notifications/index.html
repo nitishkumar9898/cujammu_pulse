@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications - CUJAMMU-PULSE</title>
+  <meta name="theme-color" content="#123149">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="notification-page">
+<main class="notification-shell">
+  <header class="notification-masthead">
+    <img src="/images/cujammu_logo_circle.png" width="56" height="56" alt="Central University of Jammu seal">
+    <div>
+      <div lang="hi" class="notification-hindi">जम्मू केंद्रीय विश्वविद्यालय</div>
+      <div class="notification-university">Central University of Jammu</div>
+      <div class="notification-product">CUJAMMU PULSE · CAMPUS SERVICES</div>
+    </div>
+  </header>
+  <section class="notification-card" aria-labelledby="notification-title">
+    <div class="notification-heading">
+      <div>
+        <p class="notification-eyebrow">YOUR CAMPUS INBOX</p>
+        <h1 id="notification-title">Notifications</h1>
+        <p class="notification-description">University updates and messages for your account.</p>
+      </div>
+      <a class="notification-back" th:href="@{/app/}">Back to campus</a>
+    </div>
+    <p th:if="${notifications.isEmpty()}" class="notification-empty" role="status">You’re all caught up. New updates will appear here.</p>
+    <form th:if="${!notifications.isEmpty()}" method="post" th:action="@{/api/notifications/read-all}" class="notification-actions">
+      <button type="submit" class="notification-read-all">Mark all as read</button>
+    </form>
+  <ul class="notification-list">
+    <li th:each="notice : ${notifications}">
+      <form method="post" th:action="@{/api/notifications/{id}/open(id=${notice.id})}" class="notification-row">
+        <button type="submit" class="notification-message"><span th:text="${notice.message}">Campus update</span></button>
+        <span class="notification-state" th:classappend="${notice.read ? ' is-read' : ' is-unread'}" th:text="${notice.read ? 'Read' : 'Unread'}">Unread</span>
+      </form>
+    </li>
+  </ul>
+  </section>
+</main>
+</body>
+</html>

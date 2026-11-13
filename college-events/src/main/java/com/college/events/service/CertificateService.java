@@ -9,10 +9,13 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Base64;
 import java.time.format.DateTimeFormatter;
 
-import com.college.events.repository.CertificateRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 
 @Service
 @RequiredArgsConstructor
@@ -20,29 +23,27 @@ import org.springframework.beans.factory.annotation.Value;
 public class CertificateService {
 
     private final TemplateEngine templateEngine;
-    private final CertificateRepository certificateRepository;
+    private final PointCertificateIssuanceService issuance;
 
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
 
     public byte[] generateCertificatePdf(Registration registration) {
+        com.college.events.model.Certificate cert = issuance.owned(registration.getId());
         try {
-            com.college.events.model.Certificate cert = certificateRepository.findByRegistration(registration)
-                .orElseThrow(() -> new RuntimeException("Certificate not found for registration."));
 
             Context context = new Context();
-            context.setVariable("reg", registration);
             context.setVariable("eventDate", 
-                registration.getEvent().getEventDate() != null ? registration.getEvent().getEventDate().format(DateTimeFormatter.ofPattern("dd MMMM, yyyy")) : "TBD");
-            context.setVariable("userName", registration.getUser().getName());
-            context.setVariable("eventTitle", registration.getEvent().getTitle());
-            context.setVariable("enrollmentNo", registration.getUser().getEnrollmentNo());
-            context.setVariable("department", registration.getUser().getDepartment());
+                cert.getEventDateSnapshot().format(DateTimeFormatter.ofPattern("dd MMMM, yyyy")));
+            context.setVariable("userName", cert.getRecipientNameSnapshot());
+            context.setVariable("eventTitle", cert.getEventTitleSnapshot());
+            context.setVariable("enrollmentNo", cert.getVerifiedIdentifierSnapshot());
             context.setVariable("certNo", cert.getCertificateNumber());
-            context.setVariable("verificationUrl", baseUrl + "/verify/" + cert.getCertificateNumber());
+            context.setVariable("verificationUrl", baseUrl + "/certificates/verify/" + cert.getCertificateNumber());
+            context.setVariable("universityLogoDataUri", universityLogoDataUri());
             
             // Render HTML template to String
-            String html = templateEngine.process("certificate-pdf-template", context);
+            String html = templateEngine.process("point-certificate-pdf-template", context);
 
             // Convert HTML to PDF using OpenHTMLtoPDF
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -55,21 +56,24 @@ public class CertificateService {
             return os.toByteArray();
         } catch (Exception e) {
             log.error("Failed to generate PDF certificate", e);
-            throw new RuntimeException("PDF generation failed: " + e.getMessage());
+            throw new IllegalStateException("Certificate PDF generation failed", e);
+        }
+    }
+
+    private String universityLogoDataUri() {
+        try (InputStream logo = new ClassPathResource("static/images/cujammu_logo.png").getInputStream()) {
+            return "data:image/png;base64," + Base64.getEncoder().encodeToString(logo.readAllBytes());
+        } catch (IOException e) {
+            log.warn("University seal unavailable while rendering certificate");
+            return null;
         }
     }
 
     public java.util.List<com.college.events.model.Certificate> findByEvent(com.college.events.model.Event event) {
-        return certificateRepository.findByEventOrderByIssuedAtDesc(event);
+        return issuance.managed(event);
     }
 
     public void issueCertificatesForEvent(com.college.events.model.Event event, String templateId, EmailService emailService) {
-        java.util.List<com.college.events.model.Certificate> certificates = certificateRepository.findByEventOrderByIssuedAtDesc(event);
-        for (com.college.events.model.Certificate cert : certificates) {
-            cert.setTemplateId(templateId);
-            cert.setEmailed(true);
-            certificateRepository.save(cert);
-            emailService.sendCertificateEmail(cert.getRegistration(), "/student/certificates/" + cert.getRegistration().getId() + "/download");
-        }
+        throw new IllegalStateException("Use reviewed point-attendance finalization; legacy certificate email issuance is unavailable");
     }
 }
