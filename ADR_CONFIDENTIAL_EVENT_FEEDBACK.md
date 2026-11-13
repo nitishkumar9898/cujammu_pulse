@@ -1,0 +1,13 @@
+# Confidential event feedback — 18 October 2026
+
+CF22 source review found that knowing an event ID allowed any authenticated account to read up to 50 comments and submit a response without registration or completion. The shared screen's eligibility claim was not enforced by the service.
+
+The SQL bridge now refreshes the authenticated actor, requires a verified identifier and confirmed own registration, and requires explicit approved/completed provenance. This authorizes a feedback response, not attendance duration or certificate eligibility. Submission takes the canonical event write lock, validates bounded rating/comment, and returns the original receipt for identical normalized retries. A changed response requires a separately reviewed correction workflow. A unique event/subject constraint adds defense in depth. Comments/rating contents are not copied into audit or ordinary logs.
+
+Only the scoped event manager may read aggregate counts/averages and at most 50 recent confidential comments. Participants have an own-receipt endpoint. Public or participant aggregate disclosure remains unavailable until the university approves privacy thresholds/moderation. No arbitrary small-group threshold is invented. Own receipts never disclose another participant's identity or response.
+
+Before applying the unique constraint to a historical database, run a read-only grouped duplicate inventory for `(event_id,user_id)`, with counts only in operator output. Any duplicate group requires an approved record-preserving reconciliation; never delete or arbitrarily select historical responses. This change does not run that migration against existing data. Local synthetic tests use a newly created isolated schema. Production migration must fail if the constraint cannot be installed; Hibernate automatic update is not migration approval.
+
+The current natural command key is one response per authenticated subject/event. Identical payload retries converge under the event lock. This is not an editable feedback policy or an exactly-once network delivery claim. Mongo replica-set migration and equivalent unique/contention proof remain separate work.
+
+Validation belongs in the final integration report: negative outsider/participant summary reads, supplied-actor spoofing, disabled account/verified-identifier revocation, cancelled/unregistered users, missing completion provenance, simultaneous identical retries, and changed-payload rejection. Private comments need no broadcast notification. Future moderation/correction workflows must classify safe recipient-specific intent without sending comment bodies through email/push.

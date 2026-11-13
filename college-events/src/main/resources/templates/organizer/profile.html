@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Profile — CUJAMMU PULSE</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: organizerSidebar(activePage='profile')}"></div>
+<div class="main-content">
+  <div th:replace="~{fragments/navbar :: topNav('My Profile')}"></div>
+  <div class="page-content fade-in">
+    <div th:replace="~{fragments/navbar :: alerts}"></div>
+    <div class="profile-container">
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+          <h6 class="fw-bold mb-0"><i class="bi bi-person-circle me-2 text-primary"></i>Profile Information</h6>
+        </div>
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <!-- Profile picture with click-to-upload overlay (WhatsApp style) -->
+            <form id="avatarForm" th:action="@{/organizer/profile/picture}" method="post" 
+                  enctype="multipart/form-data" class="d-contents">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              <input type="file" id="avatarInput" name="file" accept="image/jpeg,image/png,image/webp"
+                     class="d-none" onchange="validateAndUpload(this)" title="Upload Avatar" aria-label="Upload Avatar"/>
+              <div class="position-relative cursor-pointer" onclick="document.getElementById('avatarInput').click()" 
+                   title="Click to change profile picture">
+                <div th:if="${user.profilePicture != null and !#strings.isEmpty(user.profilePicture)}">
+                  <img th:src="'/uploads/' + ${user.profilePicture}"
+                       class="rounded-circle border border-3 border-success profile-avatar" alt="Profile"/>
+                </div>
+                <div th:unless="${user.profilePicture != null and !#strings.isEmpty(user.profilePicture)}"
+                     class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold org-avatar-initial"
+                     th:text="${#strings.substring(user.name,0,1).toUpperCase()}">O</div>
+                <!-- Camera overlay -->
+                <div class="position-absolute bottom-0 end-0 bg-primary rounded-circle d-flex align-items-center justify-content-center shadow camera-badge">
+                  <i class="bi bi-camera-fill text-white camera-icon"></i>
+                </div>
+              </div>
+            </form>
+            <div>
+              <h5 class="fw-bold mb-0" th:text="${user.name}">Name</h5>
+              <p class="text-muted mb-1 small" th:text="${user.email}">email</p>
+              <span class="badge bg-success">ORGANIZER</span>
+            </div>
+          </div>
+          <!-- Image size error toast -->
+          <div id="imgError" class="alert alert-danger py-2 px-3 d-none mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span id="imgErrorMsg">Image must be less than 5 MB</span>
+          </div>
+
+          <form th:action="@{/organizer/profile/update}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" for="inputName">Full Name</label>
+                <input type="text" id="inputName" name="name" class="form-control" th:value="${user.name}" required/>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" for="inputEmail">Email (read-only)</label>
+                <input type="email" id="inputEmail" class="form-control bg-light" th:value="${user.email}" disabled/>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" for="inputDepartment">Department</label>
+                <input type="text" id="inputDepartment" name="department" class="form-control" th:value="${user.department}"/>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" for="inputPhone">Phone</label>
+                <input type="tel" id="inputPhone" name="phone" class="form-control" th:value="${user.phone}"/>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary fw-semibold">
+                  <i class="bi bi-save me-1"></i>Save Changes
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Change password -->
+      <div class="card border-0 shadow-sm rounded-4 mt-4">
+        <div class="card-header border-0 pt-4 px-4 bg-transparent">
+          <h6 class="fw-bold mb-0"><i class="bi bi-lock me-2 text-warning"></i>Change Password</h6>
+        </div>
+        <div class="card-body p-4">
+          <form th:action="@{/organizer/profile/change-password}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" for="inputCurrentPassword">Current Password</label>
+                <input type="password" id="inputCurrentPassword" name="currentPassword" class="form-control" required/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" for="inputNewPassword">New Password</label>
+                <input type="password" id="inputNewPassword" name="newPassword" class="form-control" required minlength="8"/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" for="inputConfirmNewPassword">Confirm New</label>
+                <input type="password" id="inputConfirmNewPassword" name="confirmNewPassword" class="form-control" required/>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-warning fw-semibold">
+                  <i class="bi bi-shield-lock me-1"></i>Update Password
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:replace="~{fragments/navbar :: sidebarJs}"></script>
+<script>
+  function validateAndUpload(input) {
+    const file = input.files[0];
+    const errorToast = document.getElementById('imgError');
+    if (file) {
+      // 5 MB limit
+      if (file.size > 5 * 1024 * 1024) {
+        errorToast.classList.remove('d-none');
+        input.value = ''; // Clear file
+      } else {
+        errorToast.classList.add('d-none');
+        document.getElementById('avatarForm').submit();
+      }
+    }
+  }
+</script>
+</body>
+</html>

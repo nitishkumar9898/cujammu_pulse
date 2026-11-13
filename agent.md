@@ -1,0 +1,9 @@
+# Agent Instructions Entry Point
+
+The canonical instructions for all engineering agents are in [AGENTS.md](AGENTS.md). Read and follow that file in full; this entry point avoids maintaining two conflicting instruction sets.
+
+The complete implementation design is [UNIVERSITY_PLATFORM_ARCHITECTURE.md](UNIVERSITY_PLATFORM_ARCHITECTURE.md). The 29 active core requirements CF-01..CF-30 excluding retired CF-12 are [CORE_FEATURES_SPEC.md](CORE_FEATURES_SPEC.md). The required same-experience web/Android workflows, actions and release tests are [PLATFORM_PARITY_AND_ACCEPTANCE.md](PLATFORM_PARITY_AND_ACCEPTANCE.md). Historical implementation findings are [PROJECT_ARCHITECTURE_REVIEW.md](PROJECT_ARCHITECTURE_REVIEW.md); newer full-scope requirements supersede its earlier pilot-priority recommendations.
+
+Only the latest approved active modules remain in scope; CF-12 is retired and never reused. These documents define planned work and verification gates; they do not certify the prototype as secure, tested or production deployed. Source-module removal and runtime behavior are not performed by a documentation update.
+
+Version 1.4 adds CF-29 runtime admin module/feature/business-function toggles and CF-30 uploaded-media 30-day expiry. Read [RUNTIME_FEATURES_AND_MEDIA_SPEC.md](RUNTIME_FEATURES_AND_MEDIA_SPEC.md) for compatible no-update hide/show, server controls, safe shutdown, protected safeguards and original/derivative/backup purge. Read [SCHEDULING_AND_NOTIFICATION_SPEC.md](SCHEDULING_AND_NOTIFICATION_SPEC.md) for lifecycle/delivery and [EVENT_OPERATIONS_AND_ATTENDANCE_SPEC.md](EVENT_OPERATIONS_AND_ATTENDANCE_SPEC.md) for faculty organizers, recruitment, Single/Dual/No-QR, selected scanner/manual access and ascending reports. Follow canonical AGENTS.md; newer event evidence policy supersedes mandatory QR-2=EXIT assumptions.

@@ -1,0 +1,20 @@
+import { goToNavigation, openNavigationMenu } from './helpers/navigation';
+import { test, expect } from '@playwright/test';
+test('library OFF preserves confirmed unverified safe-exit recovery and stable retry key', async ({ page }) => {
+  const writes: unknown[] = []; let active = true;
+  await page.route('**/api/v1/session', route => route.fulfill({ json: { id: 1, name: 'Synthetic Account', role: 'STUDENT' } }));
+  await page.route('**/api/v1/session/csrf', route => route.fulfill({ json: { token: 'synthetic-csrf', headerName: 'X-CSRF-TOKEN' } }));
+  await page.route('**/api/v1/cujammu/features', route => route.fulfill({ json: { MODULE_LIBRARY_TURNSTILE: false } }));
+  await page.route('**/api/v1/cujammu/recovery/library/active', route => route.fulfill({ json: active ? [{ visitId: 2, revision: 1, purpose: 'STUDY', entryTime: '2026-10-10T10:00:00Z' }] : [] }));
+  await page.route('**/api/v1/cujammu/recovery/library/2/safe-exit', route => { expect(route.request().headers()['x-csrf-token']).toBe('synthetic-csrf'); writes.push(route.request().postDataJSON()); if (writes.length === 1) return route.fulfill({ status: 503, json: {} }); active = false; return route.fulfill({ json: { visitId: 2, revision: 2, status: 'SAFE_EXIT_UNVERIFIED', exitTime: '2026-10-10T11:00:00Z', durationQuality: 'UNVERIFIED' } }); });
+  await page.goto('/app/'); await page.getByRole('button', { name: 'Skip introduction' }).click();
+  await openNavigationMenu(page);
+  await expect(page.getByRole('tab', { name: 'Library', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Recover library exit 2', exact: true }).click(); expect(writes).toHaveLength(0);
+  await page.getByRole('checkbox', { name: /Library service disabled$/ }).click();
+  await page.getByRole('button', { name: 'Confirm unverified safe exit', exact: true }).click();
+  await expect(page.getByText('The campus service could not complete this request.', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Confirm unverified safe exit', exact: true }).click();
+  await expect(page.getByText('SAFE_EXIT_UNVERIFIED · Exit recorded', { exact: false })).toBeVisible(); expect(writes[1]).toEqual(writes[0]); expect(writes[0]).toMatchObject({ expectedRevision: 1, reasonCode: 'SERVICE_DISABLED' });
+  await expect(page.getByRole('button', { name: 'Recover library exit 2', exact: true })).toHaveCount(0);
+});

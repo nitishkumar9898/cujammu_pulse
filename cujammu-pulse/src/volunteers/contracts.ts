@@ -1,0 +1,16 @@
+export type VolunteerTask = { id:number; eventId:number; revision:number; title:string; description:string|null; category:string; status:string; hoursLogged:number; requestedHours:number|null; certificateAwarded:boolean; assignedUserName:string|null; completedAt:string|null;reportedShiftStart:string|null;reportedShiftEnd:string|null;completionEvidence:string|null;reviewReason:string|null;canAssign:boolean;canSubmit:boolean;canApprove:boolean };
+export type EligibleVolunteer={userId:number;name:string;verifiedIdentifier:string};
+export type TaskCreate={requestKey:string;title:string;description:string;category:string};
+export type TaskAssign={requestKey:string;expectedRevision:number;userId:number};
+export type TaskComplete={requestKey:string;expectedRevision:number;hoursLogged:number;shiftStart:string;shiftEnd:string;evidence:string};
+export type TaskReview={requestKey:string;expectedRevision:number;reason:string};
+function object(v:unknown):Record<string,unknown>{if(!v||typeof v!=='object'||Array.isArray(v))throw new Error('Invalid volunteer response');return v as Record<string,unknown>}
+function text(v:unknown,max:number):string{if(typeof v!=='string'||v.length>max)throw new Error('Invalid volunteer text');return v}
+function nullable(v:unknown,max:number):string|null{return v==null?null:text(v,max)}
+function time(v:unknown):string|null{if(v==null)return null;const s=text(v,80);if(!Number.isFinite(Date.parse(s)))throw new Error('Invalid volunteer time');return s}
+function integer(v:unknown,min=1):number{if(typeof v!=='number'||!Number.isSafeInteger(v)||v<min)throw new Error('Invalid volunteer identifier');return v}
+function bool(v:unknown):boolean{if(typeof v!=='boolean')throw new Error('Missing task capability');return v}
+function hours(v:unknown):number{if(typeof v!=='number'||!Number.isFinite(v)||v<0||v>24)throw new Error('Invalid volunteer hours');return v}
+function task(v:unknown):VolunteerTask{const x=object(v);const status=text(x.status,40);if(!['PENDING','ASSIGNED','IN_PROGRESS','COMPLETION_REQUESTED','COMPLETED'].includes(status))throw new Error('Unsupported volunteer task state');return {id:integer(x.id),eventId:integer(x.eventId),revision:integer(x.revision,0),title:text(x.title,120),description:nullable(x.description,2000),category:text(x.category,50),status,hoursLogged:hours(x.hoursLogged),requestedHours:x.requestedHours==null?null:hours(x.requestedHours),certificateAwarded:bool(x.certificateAwarded),assignedUserName:nullable(x.assignedUserName,160),completedAt:time(x.completedAt),reportedShiftStart:time(x.reportedShiftStart),reportedShiftEnd:time(x.reportedShiftEnd),completionEvidence:nullable(x.completionEvidence,1000),reviewReason:nullable(x.reviewReason,500),canAssign:bool(x.canAssign),canSubmit:bool(x.canSubmit),canApprove:bool(x.canApprove)}}
+export const decodeVolunteerTasks=(v:unknown):VolunteerTask[]=>Array.isArray(v)&&v.length<=50?v.map(task):(()=>{throw new Error('Invalid volunteer task page')})();
+export const decodeEligibleVolunteers=(v:unknown):EligibleVolunteer[]=>{if(!Array.isArray(v)||v.length>50)throw new Error('Invalid volunteer roster page');return v.map(value=>{const x=object(value);return {userId:integer(x.userId),name:text(x.name,160),verifiedIdentifier:text(x.verifiedIdentifier,64)}})};

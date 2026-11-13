@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Feature Switches — CUJAMMU-PULSE Admin</title>
+  <meta name="_csrf" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:content="${_csrf.headerName}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="/css/style.css" rel="stylesheet"/>
+  <style>
+    .switch-card {
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 14px;
+    }
+    .switch-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+    .form-check-input:checked {
+      background-color: #10B981;
+      border-color: #10B981;
+    }
+    .form-switch .form-check-input {
+      width: 3.2em;
+      height: 1.7em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: adminSidebar(activePage='features')}"></div>
+<div class="main-content">
+  <div th:replace="~{fragments/navbar :: topNav('Master Feature Switches')}"></div>
+
+  <div class="page-content fade-in">
+    <div th:replace="~{fragments/navbar :: alerts}"></div>
+
+    <!-- Header info banner -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: linear-gradient(135deg, #0B2238 0%, #133658 100%); color: white;">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div>
+            <h4 class="fw-bold mb-1"><i class="bi bi-toggle2-on text-warning me-2"></i>Module and feature controls</h4>
+            <p class="mb-0 text-light opacity-75 small">
+              Review and save server controls with a reason. Compatible clients refresh their available actions; installed-client compatibility and live propagation still require release verification.
+            </p>
+          </div>
+          <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">
+            <i class="bi bi-lightning-charge-fill me-1"></i>Server-authorized controls
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Toast Alert -->
+    <div id="liveToast" class="alert alert-success d-none py-2 px-3 rounded-pill shadow-sm align-items-center justify-content-between mb-3" role="alert">
+      <span><i class="bi bi-check-circle-fill me-2"></i><span id="toastMsg">Feature flag updated successfully!</span></span>
+      <button type="button" class="btn-close btn-sm ms-3" onclick="document.getElementById('liveToast').classList.add('d-none')"></button>
+    </div>
+
+    <!-- Feature Switches Grid -->
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4" th:each="flag : ${flags}">
+        <div class="card switch-card h-100 p-3 bg-white">
+          <div class="card-body d-flex flex-column justify-content-between p-2">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-secondary-subtle text-dark border small fw-semibold" th:text="${flag.category}">CATEGORY</span>
+                <span class="badge px-2 py-1 small"
+                      th:id="'badge-' + ${flag.featureKey}"
+                      th:classappend="${flag.enabled} ? 'bg-success' : 'bg-danger'"
+                      th:text="${flag.enabled} ? 'ENABLED' : 'DISABLED'">STATUS</span>
+              </div>
+              <h6 class="fw-bold text-dark mb-1" th:text="${flag.displayName}">Display Name</h6>
+              <p class="text-muted small mb-3" th:text="${flag.description}">Description</p>
+            </div>
+
+            <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+              <div>
+                <small class="text-muted d-block" style="font-size: 11px;">Flag Key:</small>
+                <code class="small fw-bold text-primary" th:text="${flag.featureKey}">KEY</code>
+              </div>
+              <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" role="switch"
+                       th:id="'switch-' + ${flag.featureKey}"
+                       th:checked="${flag.enabled}"
+                       th:attr="data-revision=${flag.revision}"
+                       th:disabled="${flag.category == 'LOCKED'}"
+                       th:onchange="'toggleFlag(\'' + ${flag.featureKey} + '\', this.checked)'">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleFlag(flagKey, isChecked) {
+  const badge = document.getElementById('badge-' + flagKey);
+  const toast = document.getElementById('liveToast');
+  const toastMsg = document.getElementById('toastMsg');
+
+  const control = document.getElementById('switch-' + flagKey);
+  const reason = prompt('Reason for changing this control (no private personal data):');
+  if (!reason || !reason.trim() || reason.length > 300) { control.checked = !isChecked; return; }
+  if (!confirm('Save this control change? Dependent ordinary actions may become unavailable.')) { control.checked = !isChecked; return; }
+  control.disabled = true;
+  badge.innerText = 'SAVING';
+
+  // REST API PUT call
+  fetch('/api/v1/cujammu/features/' + flagKey, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      [document.querySelector('meta[name="_csrf_header"]').getAttribute('content')]:
+        document.querySelector('meta[name="_csrf"]').getAttribute('content')
+    },
+    body: JSON.stringify({ enabled: isChecked, expectedRevision: Number(control.dataset.revision), reason: reason.trim() })
+  })
+  .then(resp => {
+    if (!resp.ok) throw new Error('Unauthorized or Server Error');
+    return resp.json();
+  })
+  .then(data => {
+    control.dataset.revision = String(data.revision);
+    badge.className = 'badge px-2 py-1 small ' + (data.effectiveEnabled ? 'bg-success' : 'bg-secondary');
+    badge.innerText = data.effectiveEnabled ? 'ON' : (data.requestedEnabled ? 'DEPENDENCY BLOCKED' : 'OFF');
+    toastMsg.innerText = 'Server control saved. Compatible clients will refresh their available actions.';
+    toast.className = 'alert alert-success d-flex py-2 px-3 rounded-3 shadow-sm align-items-center justify-content-between mb-3';
+    setTimeout(() => { toast.classList.add('d-none'); }, 4000);
+  })
+  .catch(err => {
+    // Revert switch on failure
+    document.getElementById('switch-' + flagKey).checked = !isChecked;
+    badge.className = 'badge px-2 py-1 small bg-secondary';
+    badge.innerText = 'REFRESH REQUIRED';
+    alert('Failed to update feature switch: ' + err.message);
+  }).finally(() => { control.disabled = false; });
+}
+</script>
+</body>
+</html>

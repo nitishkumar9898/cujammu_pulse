@@ -1,0 +1,13 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
+import { api, ApiError, newRequestKey } from '../api';
+import type { PendingAttendanceIntent } from './contracts';
+import { Body, Button, Field, Heading, Panel } from '../ui';
+
+export function AttendanceScreen({ onSessionExpired }: { onSessionExpired: () => void }) {
+  const [items, setItems] = useState<PendingAttendanceIntent[]>([]); const [codes, setCodes] = useState<Record<string, string>>({}); const [busy, setBusy] = useState<string | null>(null); const [error, setError] = useState('');
+  const load = useCallback(async () => { try { setItems(await api.pendingAttendanceIntents()); setError(''); } catch (e) { if (e instanceof ApiError && e.status === 401) onSessionExpired(); else setError(e instanceof Error ? e.message : 'Attendance confirmations could not be loaded.'); } }, [onSessionExpired]);
+  useEffect(() => { void load(); }, [load]);
+  const confirm = async (intent: PendingAttendanceIntent) => { const code = (codes[intent.intentKey] ?? '').trim(); if (!/^\d{6}$/.test(code) || busy) return; setBusy(intent.intentKey); setError(''); try { await api.confirmAttendanceIntent(intent.intentKey, code, newRequestKey()); setItems(current => current.filter(item => item.intentKey !== intent.intentKey)); } catch (e) { if (e instanceof ApiError && e.status === 401) onSessionExpired(); else setError(e instanceof Error ? e.message : 'Attendance confirmation failed.'); } finally { setBusy(null); } };
+  return <View style={{ gap: 14 }}><Panel><Heading>Attendance confirmations</Heading><Body>When a permitted scanner reads your owner-bound event credential, confirm the short-lived challenge here. This screen never exposes another participant’s identity or QR secret.</Body>{error ? <Text accessibilityRole="alert">{error}</Text> : null}{items.length === 0 ? <Body>No pending attendance confirmations.</Body> : items.map(item => <View key={item.intentKey} style={{ borderTopWidth: 1, paddingTop: 10, gap: 6 }}><Heading>{item.eventTitle}</Heading><Body>{item.action.replace('_', ' ')} · Expires {new Date(item.expiresAt).toLocaleString()}</Body><Field label="6-digit confirmation code" value={codes[item.intentKey] ?? ''} onChange={value => setCodes(current => ({ ...current, [item.intentKey]: value.replace(/\D/g, '').slice(0, 6) }))} maxLength={6} /><Button actionId="attendance.scan-intent.confirm" label={busy === item.intentKey ? 'Confirming…' : 'Confirm attendance'} disabled={busy !== null || !/^\d{6}$/.test(codes[item.intentKey] ?? '')} onPress={() => void confirm(item)} /></View>)}</Panel></View>;
+}

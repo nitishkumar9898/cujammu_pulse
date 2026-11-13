@@ -1,0 +1,26 @@
+# Generated output and local/private runtime state. Existing tracked files need separate reviewed cleanup.
+**/target/
+**/bin/
+**/build/
+**/node_modules/
+**/.expo/
+**/dist/
+**/dist-android/
+**/test-results/
+**/playwright-report/
+**/.gradle/
+**/data/
+# `data` is also a normal source-package name; keep application code visible to Git.
+!**/src/**/data/
+!**/src/**/data/**
+**/logs/
+**/uploads/
+**/*.mv.db
+**/*.trace.db
+**/*.log
+**/.env
+**/.env.*
+!**/.env.example
+**/local.properties
+**/*.jks
+**/*.keystore

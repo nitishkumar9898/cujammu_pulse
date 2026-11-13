@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title th:text="${event.title} + ' — CUJAMMU PULSE'">Event</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: studentSidebar(activePage='events')}"></div>
+<div class="main-content">
+  <div th:replace="~{fragments/navbar :: topNav('Event Details')}"></div>
+  <div class="page-content fade-in">
+    <div th:replace="~{fragments/navbar :: alerts}"></div>
+
+    <div class="row g-4">
+      <!-- Main -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+          <img th:if="${event.bannerImage != null}"
+               th:src="'/uploads/' + ${event.bannerImage}"
+               class="card-img-top banner-cover" alt="Banner"/>
+          <div th:unless="${event.bannerImage != null}"
+               class="d-flex align-items-center justify-content-center banner-placeholder">
+            <i th:class="'bi ' + (${event.category != null} ? ${event.category.icon} : 'bi-calendar-event')"
+               class="placeholder-icon"></i>
+          </div>
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+              <div>
+                <span class="badge mb-2"
+                      th:classappend="${event.category != null} ? ${'bg-' + event.category.colorClass} : 'bg-primary'"
+                      th:text="${event.category != null} ? ${event.category.name} : 'General'">Cat</span>
+                <h3 class="fw-bold mb-0" th:text="${event.title}">Title</h3>
+              </div>
+              <span th:if="${event.fees > 0}" class="badge bg-warning text-dark fs-6 px-3 py-2"
+                    th:text="'₹' + ${event.fees}">Fee</span>
+              <span th:unless="${event.fees > 0}" class="badge bg-success fs-6 px-3 py-2">FREE</span>
+            </div>
+            <p class="text-muted desc-preline" th:text="${event.description}">Desc</p>
+          </div>
+        </div>
+
+        <!-- Organizer Info -->
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+          <h6 class="fw-bold mb-3"><i class="bi bi-person-badge me-2 text-primary"></i>Organized By</h6>
+          <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center organizer-avatar">
+              <i class="bi bi-person fs-4 text-primary"></i>
+            </div>
+            <div>
+              <div class="fw-semibold" th:text="${event.organizer.name}">Name</div>
+              <div class="text-muted small" th:text="${event.organizer.department}">Dept</div>
+              <div th:if="${event.contactEmail}" class="text-muted small">
+                <i class="bi bi-envelope me-1"></i><span th:text="${event.contactEmail}">email</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Speakers Selection -->
+        <div th:if="${speakers != null and !speakers.isEmpty()}" class="mt-4">
+          <h5 class="fw-bold mb-3"><i class="bi bi-mic me-2 text-primary"></i>Featured Speakers</h5>
+          <div class="row g-3">
+            <div class="col-md-6" th:each="spk : ${speakers}">
+              <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white hover-lift">
+                <div class="d-flex gap-3">
+                  <img th:if="${spk.safeProfileImageUrl != null and !spk.safeProfileImageUrl.isEmpty()}" 
+                       th:src="${spk.safeProfileImageUrl}" class="rounded-circle speaker-avatar" alt="Speaker photo" title="Speaker photo"/>
+                  <div th:if="${spk.safeProfileImageUrl == null or spk.safeProfileImageUrl.isEmpty()}" 
+                       class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold speaker-initial">
+                    <span th:text="${#strings.substring(spk.name,0,1)}">A</span>
+                  </div>
+                  <div>
+                    <h6 class="fw-bold mb-1 text-dark" th:text="${spk.name}">Name</h6>
+                    <small class="text-muted d-block mb-1 speaker-bio" th:text="${spk.bio}">Bio</small>
+                    <a th:if="${spk.safeLinkedInUrl != null and !spk.safeLinkedInUrl.isEmpty()}" 
+                       th:href="${spk.safeLinkedInUrl}" target="_blank" rel="noopener noreferrer" class="small text-primary text-decoration-none">
+                      <i class="bi bi-linkedin me-1"></i>LinkedIn
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sponsors Selection -->
+        <div th:if="${sponsors != null and !sponsors.isEmpty()}" class="mt-4">
+          <h5 class="fw-bold mb-3"><i class="bi bi-star-fill me-2 text-warning"></i>Event Sponsors</h5>
+          <div class="row g-3">
+            <div class="col-md-4" th:each="spo : ${sponsors}">
+              <div class="card border-0 shadow-sm rounded-4 h-100 p-3 text-center bg-white hover-lift position-relative">
+                <div class="d-flex align-items-center justify-content-center mb-2 sponsor-logo-box">
+                  <img th:if="${spo.safeLogoUrl != null and !spo.safeLogoUrl.isEmpty()}" 
+                       th:src="${spo.safeLogoUrl}" class="sponsor-logo-img" alt="Sponsor logo" title="Sponsor logo"/>
+                  <div th:if="${spo.safeLogoUrl == null or spo.safeLogoUrl.isEmpty()}" 
+                       class="bg-light rounded-circle d-flex align-items-center justify-content-center sponsor-fallback">
+                    <i class="bi bi-building fs-4 text-muted"></i>
+                  </div>
+                </div>
+                <h6 class="fw-bold mb-1 sponsor-name" th:text="${spo.companyName}">Company</h6>
+                <div class="mt-auto">
+                  <span class="badge" th:classappend="${spo.sponsorshipTier == 'PLATINUM'} ? 'bg-dark' : (${spo.sponsorshipTier == 'GOLD'} ? 'bg-warning text-dark' : (${spo.sponsorshipTier == 'SILVER'} ? 'bg-secondary' : 'bg-danger'))" 
+                        th:text="${spo.sponsorshipTier}">Tier</span>
+                </div>
+                <a th:if="${spo.safeWebsiteUrl != null and !spo.safeWebsiteUrl.isEmpty()}" th:href="${spo.safeWebsiteUrl}" target="_blank" rel="noopener noreferrer" class="stretched-link" aria-label="Sponsor Website"></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar info -->
+      <div class="col-lg-4">
+        <!-- Event info card -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <h6 class="fw-bold mb-3 text-muted text-uppercase detail-heading">Event Details</h6>
+            <ul class="list-unstyled mb-0">
+              <li class="d-flex gap-3 mb-3">
+                <div class="bg-primary bg-opacity-10 rounded-2 p-2 flex-shrink-0">
+                  <i class="bi bi-calendar3 text-primary"></i>
+                </div>
+                <div>
+                  <div class="small text-muted">Date &amp; Time</div>
+                  <div class="fw-semibold small"
+                       th:text="${#temporals.format(event.eventDate,'EEEE, dd MMMM yyyy')}">Date</div>
+                  <div class="small text-muted"
+                       th:text="${#temporals.format(event.eventDate,'hh:mm a')}">Time</div>
+                </div>
+              </li>
+              <li class="d-flex gap-3 mb-3">
+                <div class="bg-danger bg-opacity-10 rounded-2 p-2 flex-shrink-0">
+                  <i class="bi bi-geo-alt text-danger"></i>
+                </div>
+                <div>
+                  <div class="small text-muted">Venue</div>
+                  <div class="fw-semibold small" th:text="${event.venue}">Venue</div>
+                </div>
+              </li>
+              <li class="d-flex gap-3 mb-3">
+                <div class="bg-success bg-opacity-10 rounded-2 p-2 flex-shrink-0">
+                  <i class="bi bi-people text-success"></i>
+                </div>
+                <div>
+                  <div class="small text-muted">Seats</div>
+                  <div class="fw-semibold small">
+                    <span th:text="${confirmedCount}">0</span> / <span th:text="${event.maxSeats}">0</span> filled
+                  </div>
+                  <div th:if="${availableSeats > 0}" class="small text-success">
+                    <span th:text="${availableSeats}">0</span> seats available
+                  </div>
+                  <div th:unless="${availableSeats > 0}" class="small text-danger">Full — Waitlist available</div>
+                </div>
+              </li>
+              <li th:if="${waitlistedCount > 0}" class="d-flex gap-3">
+                <div class="bg-warning bg-opacity-10 rounded-2 p-2 flex-shrink-0">
+                  <i class="bi bi-hourglass text-warning"></i>
+                </div>
+                <div>
+                  <div class="small text-muted">Waitlist</div>
+                  <div class="fw-semibold small" th:text="${waitlistedCount} + ' on waitlist'">0</div>
+                </div>
+              </li>
+            </ul>
+
+            <!-- Seat progress bar -->
+            <div class="mt-3">
+              <div class="d-flex justify-content-between small text-muted mb-1">
+                <span>Capacity</span>
+                <span th:text="${confirmedCount} + '/' + ${event.maxSeats}">0/0</span>
+              </div>
+              <div class="progress progress-slim">
+                <div class="progress-bar"
+                     th:classappend="${confirmedCount >= event.maxSeats} ? 'bg-danger' : 'bg-success'"
+                     th:style="${'width:' + (confirmedCount * 100 / event.maxSeats) + '%'}"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Registration action -->
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+
+          <!-- Not yet registered -->
+          <div th:if="${myRegistration == null}">
+            <form th:action="'/student/events/' + ${event.id} + '/register'" method="post">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold mb-2">
+                <i th:if="${!isFull}" class="bi bi-ticket-perforated me-2"></i>
+                <i th:if="${isFull}" class="bi bi-hourglass-split me-2"></i>
+                <span th:if="${!isFull}">Register Now</span>
+                <span th:if="${isFull}">Join Waitlist</span>
+              </button>
+              <p class="text-muted text-center small mb-0"
+                 th:if="${isFull}">You'll be notified if a seat opens up.</p>
+            </form>
+          </div>
+
+          <!-- Already registered -->
+          <div th:unless="${myRegistration == null}">
+            <div class="alert mb-3 text-center"
+                 th:classappend="${myRegistration.status.name() == 'REGISTERED' or myRegistration.status.name() == 'ATTENDED'} ? 'alert-success' : (${myRegistration.status.name() == 'WAITLISTED'} ? 'alert-warning' : 'alert-secondary')">
+              <i class="bi bi-check-circle-fill me-2"
+                 th:if="${myRegistration.status.name() == 'REGISTERED'}"></i>
+              <i class="bi bi-hourglass me-2"
+                 th:if="${myRegistration.status.name() == 'WAITLISTED'}"></i>
+              <i class="bi bi-check-all me-2"
+                 th:if="${myRegistration.status.name() == 'ATTENDED'}"></i>
+              <strong th:text="${myRegistration.status.name()}">Status</strong>
+            </div>
+            <div th:if="${myRegistration.status.name() == 'REGISTERED' or myRegistration.status.name() == 'ATTENDED'}"
+                 class="small text-muted text-center mb-2">Secure event pass is unavailable in this release.</div>
+            <form th:if="${myRegistration.status.name() == 'REGISTERED' or myRegistration.status.name() == 'WAITLISTED'}"
+                  th:action="'/student/registrations/' + ${myRegistration.id} + '/cancel'" method="post">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              <button type="submit" class="btn btn-outline-danger w-100 btn-sm">
+                <i class="bi bi-x-circle me-1"></i>Cancel Registration
+              </button>
+            </form>
+          </div>
+
+          <!-- Add to Calendar Link -->
+          <a th:href="'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + ${event.title} + '&dates=' + ${#temporals.format(event.eventDate,'yyyyMMdd''T''HHmmss')} + '/' + ${#temporals.format(event.eventDate.plusHours(2),'yyyyMMdd''T''HHmmss')} + '&details=Join via CUJAMMU PULSE&location=' + ${event.venue}" 
+             target="_blank" rel="noopener noreferrer" 
+             class="btn btn-outline-secondary w-100 mt-3 fw-bold border-secondary text-secondary hover-lift">
+            <i class="bi bi-google me-2 text-danger"></i>Add to Calendar
+          </a>
+
+          <!-- Social Share Buttons -->
+          <div class="mt-4 pt-4 border-top text-center">
+            <p class="small text-muted fw-bold mb-3 text-uppercase share-label">Share Event</p>
+            <div class="d-flex justify-content-center gap-3">
+              <a th:href="'https://api.whatsapp.com/send?text=I\'m attending ' + ${event.title} + '! Join me on CUJAMMU PULSE.'" 
+                 target="_blank" rel="noopener noreferrer" class="btn btn-outline-success rounded-circle d-flex align-items-center justify-content-center hover-lift p-0 social-btn-circle" title="Share on WhatsApp">
+                <i class="bi bi-whatsapp fs-5"></i>
+              </a>
+              <a th:href="'https://twitter.com/intent/tweet?text=I am attending ' + ${event.title} + '! &hashtags=CUJAMMUEvents'" 
+                 target="_blank" rel="noopener noreferrer" class="btn btn-outline-dark rounded-circle d-flex align-items-center justify-content-center hover-lift p-0 social-btn-circle" title="Share on X (Twitter)">
+                <i class="bi bi-twitter-x fs-5"></i>
+              </a>
+              <a th:href="'https://www.linkedin.com/sharing/share-offsite/?url=https://cujammu-events.com'" 
+                 target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center hover-lift p-0 social-btn-circle" title="Share on LinkedIn">
+                <i class="bi bi-linkedin fs-5"></i>
+              </a>
+              <button onclick="navigator.clipboard.writeText(window.location.href); alert('Link copied to clipboard!');" 
+                      class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center hover-lift p-0 social-btn-circle" title="Copy Link">
+                <i class="bi bi-link-45deg fs-5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:replace="~{fragments/navbar :: sidebarJs}"></script>
+</body>
+</html>

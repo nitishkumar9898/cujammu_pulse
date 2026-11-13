@@ -1,0 +1,19 @@
+# Allow only build inputs; local data, secrets, logs, artifacts and reference apps never enter the context.
+**
+!college-events/
+!college-events/Dockerfile
+!college-events/pom.xml
+!college-events/src/
+!college-events/src/**
+!cujammu-pulse/
+!cujammu-pulse/package.json
+!cujammu-pulse/package-lock.json
+!cujammu-pulse/app.json
+!cujammu-pulse/index.ts
+!cujammu-pulse/tsconfig.json
+!cujammu-pulse/src/
+!cujammu-pulse/src/**
+!cujammu-pulse/tests/
+!cujammu-pulse/tests/**
+!cujammu-pulse/scripts/
+!cujammu-pulse/scripts/**

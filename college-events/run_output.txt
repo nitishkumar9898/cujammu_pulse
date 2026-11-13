@@ -1,0 +1,904 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< com.college:events >-------------------------
+[INFO] Building College Event Management System 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.2.5:run (default-cli) > test-compile @ events >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ events ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 27 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ events ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 36 source files with javac [debug release 21] to target\classes
+mvn : WARNING: A 
+terminally deprecated 
+method in 
+sun.misc.Unsafe has 
+been called
+At line:1 char:1
++ mvn spring-boot:run "
+-Dspring-boot.run.jvmAr
+guments=-Dspring.profil
+es ...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : 
+NotSpecified: (WAR    
+NING: A term...has bee 
+   n called:String) 
+[], R    emoteException
+    + 
+FullyQualifiedErrorI   
+ d : NativeCommandError
+ 
+WARNING: sun.misc.Unsaf
+e::objectFieldOffset 
+has been called by 
+lombok.permit.Permit
+WARNING: Please 
+consider reporting 
+this to the 
+maintainers of class 
+lombok.permit.Permit
+WARNING: sun.misc.Unsaf
+e::objectFieldOffset 
+will be removed in a 
+future release
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ events ---
+[INFO] skip non existing resourceDirectory C:\Users\NITISH KUMAR\OneDrive\Desktop\college-events-project\college-events\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ events ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 1 source file with javac [debug release 21] to target\test-classes
+[INFO] 
+[INFO] <<< spring-boot:3.2.5:run (default-cli) < test-compile @ events <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.2.5:run (default-cli) @ events ---
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/3.2.5/spring-boot-buildpack-platform-3.2.5.pom
+Progress (1): 970 B
+Progress (1): 2.7 kB
+Progress (1): 3.2 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/3.2.5/spring-boot-buildpack-platform-3.2.5.pom (3.2 kB at 4.1 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.2.3/httpclient5-5.2.3.pom
+Progress (1): 869 B
+Progress (1): 2.0 kB
+Progress (1): 4.7 kB
+Progress (1): 6.0 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.2.3/httpclient5-5.2.3.pom (6.0 kB at 149 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5-parent/5.2.3/httpclient5-parent-5.2.3.pom
+Progress (1): 837 B
+Progress (1): 1.9 kB
+Progress (1): 3.5 kB
+Progress (1): 8.2 kB
+Progress (1): 9.7 kB
+Progress (1): 13 kB 
+Progress (1): 17 kB
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5-parent/5.2.3/httpclient5-parent-5.2.3.pom (17 kB at 192 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/3.2.5/spring-boot-loader-tools-3.2.5.pom
+Progress (1): 1.0 kB
+Progress (1): 2.2 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/3.2.5/spring-boot-loader-tools-3.2.5.pom (2.2 kB at 14 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/3.2.5/spring-boot-buildpack-platform-3.2.5.jar
+Progress (1): 0.9/272 kB
+Progress (1): 2.3/272 kB
+Progress (1): 3.6/272 kB
+Progress (1): 5.0/272 kB
+Progress (1): 6.4/272 kB
+Progress (1): 7.7/272 kB
+Progress (1): 8.2/272 kB
+Progress (1): 9.6/272 kB
+Progress (1): 11/272 kB 
+Progress (1): 12/272 kB
+Progress (1): 14/272 kB
+Progress (1): 15/272 kB
+Progress (1): 16/272 kB
+Progress (1): 18/272 kB
+Progress (1): 19/272 kB
+Progress (1): 21/272 kB
+Progress (1): 22/272 kB
+Progress (1): 23/272 kB
+Progress (1): 25/272 kB
+Progress (1): 26/272 kB
+Progress (1): 27/272 kB
+Progress (1): 29/272 kB
+Progress (1): 30/272 kB
+Progress (1): 31/272 kB
+Progress (1): 33/272 kB
+Progress (1): 34/272 kB
+Progress (1): 36/272 kB
+Progress (1): 37/272 kB
+Progress (1): 38/272 kB
+Progress (1): 43/272 kB
+Progress (1): 47/272 kB
+Progress (1): 51/272 kB
+Progress (1): 55/272 kB
+Progress (1): 57/272 kB
+Progress (1): 62/272 kB
+Progress (1): 66/272 kB
+Progress (1): 70/272 kB
+Progress (1): 74/272 kB
+Progress (1): 78/272 kB
+Progress (1): 83/272 kB
+Progress (1): 87/272 kB
+Progress (1): 91/272 kB
+Progress (1): 95/272 kB
+Progress (1): 100/272 kB
+Progress (1): 104/272 kB
+Progress (1): 108/272 kB
+Progress (1): 112/272 kB
+Progress (1): 117/272 kB
+Progress (1): 121/272 kB
+Progress (1): 125/272 kB
+Progress (1): 129/272 kB
+Progress (1): 133/272 kB
+Progress (1): 138/272 kB
+Progress (1): 139/272 kB
+Progress (1): 143/272 kB
+Progress (1): 148/272 kB
+Progress (1): 152/272 kB
+Progress (1): 156/272 kB
+Progress (1): 160/272 kB
+Progress (1): 164/272 kB
+Progress (1): 168/272 kB
+Progress (1): 173/272 kB
+Progress (1): 177/272 kB
+Progress (1): 181/272 kB
+Progress (1): 185/272 kB
+Progress (1): 189/272 kB
+Progress (1): 194/272 kB
+Progress (1): 198/272 kB
+Progress (1): 202/272 kB
+Progress (1): 219/272 kB
+Progress (1): 235/272 kB
+Progress (1): 251/272 kB
+Progress (1): 268/272 kB
+Progress (1): 272 kB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/3.2.5/spring-boot-buildpack-platform-3.2.5.jar (272 kB at 340 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.21/commons-compress-1.21.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.2.3/httpclient5-5.2.3.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/3.2.5/spring-boot-loader-tools-3.2.5.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/1.5.8/plexus-utils-1.5.8.jar
+Progress (1): 7.7/435 kB
+Progress (1): 8.2/435 kB
+Progress (1): 25/435 kB 
+Progress (1): 41/435 kB
+Progress (1): 57/435 kB
+Progress (1): 66/435 kB
+Progress (1): 74/435 kB
+Progress (2): 74/435 kB | 0.9/268 kB
+Progress (2): 74/435 kB | 2.3/268 kB
+Progress (2): 74/435 kB | 3.6/268 kB
+Progress (2): 74/435 kB | 5.0/268 kB
+Progress (2): 74/435 kB | 6.4/268 kB
+Progress (2): 74/435 kB | 7.7/268 kB
+Progress (2): 74/435 kB | 9.1/268 kB
+Progress (2): 74/435 kB | 10/268 kB 
+Progress (2): 74/435 kB | 12/268 kB
+Progress (2): 74/435 kB | 12/268 kB
+Progress (2): 74/435 kB | 14/268 kB
+Progress (2): 74/435 kB | 15/268 kB
+Progress (2): 74/435 kB | 16/268 kB
+Progress (2): 74/435 kB | 18/268 kB
+Progress (3): 74/435 kB | 18/268 kB | 0.9/843 kB
+Progress (3): 74/435 kB | 19/268 kB | 0.9/843 kB
+Progress (3): 74/435 kB | 19/268 kB | 2.3/843 kB
+Progress (3): 74/435 kB | 21/268 kB | 2.3/843 kB
+Progress (3): 74/435 kB | 21/268 kB | 3.6/843 kB
+Progress (3): 74/435 kB | 22/268 kB | 3.6/843 kB
+Progress (3): 74/435 kB | 22/268 kB | 5.0/843 kB
+Progress (3): 74/435 kB | 23/268 kB | 5.0/843 kB
+Progress (3): 74/435 kB | 23/268 kB | 6.4/843 kB
+Progress (3): 74/435 kB | 25/268 kB | 6.4/843 kB
+Progress (3): 74/435 kB | 25/268 kB | 7.7/843 kB
+Progress (3): 74/435 kB | 26/268 kB | 7.7/843 kB
+Progress (3): 74/435 kB | 27/268 kB | 7.7/843 kB
+Progress (3): 74/435 kB | 27/268 kB | 9.1/843 kB
+Progress (3): 74/435 kB | 29/268 kB | 9.1/843 kB
+Progress (3): 74/435 kB | 30/268 kB | 9.1/843 kB
+Progress (3): 74/435 kB | 31/268 kB | 9.1/843 kB
+Progress (3): 74/435 kB | 33/268 kB | 9.1/843 kB
+Progress (3): 74/435 kB | 33/268 kB | 10/843 kB 
+Progress (3): 74/435 kB | 34/268 kB | 10/843 kB
+Progress (3): 74/435 kB | 36/268 kB | 10/843 kB
+Progress (3): 74/435 kB | 36/268 kB | 12/843 kB
+Progress (3): 74/435 kB | 36/268 kB | 13/843 kB
+Progress (3): 74/435 kB | 37/268 kB | 13/843 kB
+Progress (3): 74/435 kB | 37/268 kB | 15/843 kB
+Progress (3): 74/435 kB | 38/268 kB | 15/843 kB
+Progress (3): 74/435 kB | 38/268 kB | 16/843 kB
+Progress (3): 74/435 kB | 40/268 kB | 16/843 kB
+Progress (3): 74/435 kB | 40/268 kB | 17/843 kB
+Progress (3): 74/435 kB | 41/268 kB | 17/843 kB
+Progress (3): 74/435 kB | 41/268 kB | 19/843 kB
+Progress (3): 74/435 kB | 42/268 kB | 19/843 kB
+Progress (3): 74/435 kB | 42/268 kB | 20/843 kB
+Progress (3): 74/435 kB | 44/268 kB | 20/843 kB
+Progress (3): 74/435 kB | 44/268 kB | 21/843 kB
+Progress (3): 74/435 kB | 44/268 kB | 23/843 kB
+Progress (3): 74/435 kB | 45/268 kB | 23/843 kB
+Progress (3): 74/435 kB | 45/268 kB | 24/843 kB
+Progress (3): 74/435 kB | 47/268 kB | 24/843 kB
+Progress (3): 74/435 kB | 47/268 kB | 25/843 kB
+Progress (3): 74/435 kB | 48/268 kB | 25/843 kB
+Progress (3): 74/435 kB | 48/268 kB | 26/843 kB
+Progress (3): 74/435 kB | 48/268 kB | 27/843 kB
+Progress (3): 74/435 kB | 49/268 kB | 27/843 kB
+Progress (3): 74/435 kB | 49/268 kB | 29/843 kB
+Progress (3): 74/435 kB | 51/268 kB | 29/843 kB
+Progress (3): 74/435 kB | 51/268 kB | 30/843 kB
+Progress (3): 74/435 kB | 52/268 kB | 30/843 kB
+Progress (3): 74/435 kB | 52/268 kB | 31/843 kB
+Progress (3): 74/435 kB | 53/268 kB | 31/843 kB
+Progress (3): 74/435 kB | 55/268 kB | 31/843 kB
+Progress (3): 74/435 kB | 55/268 kB | 33/843 kB
+Progress (3): 74/435 kB | 55/268 kB | 34/843 kB
+Progress (3): 74/435 kB | 59/268 kB | 34/843 kB
+Progress (3): 82/435 kB | 59/268 kB | 34/843 kB
+Progress (3): 82/435 kB | 59/268 kB | 36/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 36/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 37/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 38/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 40/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 41/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 42/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 44/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 45/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 46/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 48/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 49/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 51/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 52/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 53/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 55/843 kB
+Progress (3): 82/435 kB | 63/268 kB | 59/843 kB
+Progress (4): 82/435 kB | 63/268 kB | 59/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 63/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 63/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 63/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 63/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 63/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 63/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 63/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 63/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 63/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 63/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 63/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 63/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 67/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 67/268 kB | 63/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 67/268 kB | 67/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 72/268 kB | 67/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 72/268 kB | 67/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 76/268 kB | 67/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 76/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 80/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 80/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 84/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 84/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 84/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 89/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 89/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 93/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 93/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 82/435 kB | 93/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 98/435 kB | 93/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 98/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 98/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 98/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 98/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 98/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 115/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 115/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 115/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0.1/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0.1/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0.1/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0.1/1.0 MB
+Progress (4): 123/435 kB | 97/268 kB | 72/843 kB | 0.1/1.0 MB
+Progress (4): 123/435 kB | 101/268 kB | 72/843 kB | 0.1/1.0 MB
+Progress (4): 123/435 kB | 101/268 kB | 76/843 kB | 0.1/1.0 MB
+Progress (4): 123/435 kB | 101/268 kB | 76/843 kB | 0.1/1.0 MB
+Progress (4): 131/435 kB | 101/268 kB | 76/843 kB | 0.1/1.0 MB
+Progress (4): 131/435 kB | 101/268 kB | 80/843 kB | 0.1/1.0 MB
+Progress (4): 131/435 kB | 105/268 kB | 80/843 kB | 0.1/1.0 MB
+Progress (4): 131/435 kB | 105/268 kB | 80/843 kB | 0.1/1.0 MB
+Progress (4): 131/435 kB | 105/268 kB | 84/843 kB | 0.1/1.0 MB
+Progress (4): 131/435 kB | 110/268 kB | 84/843 kB | 0.1/1.0 MB
+Progress (4): 131/435 kB | 110/268 kB | 84/843 kB | 0.1/1.0 MB
+Progress (4): 131/435 kB | 110/268 kB | 89/843 kB | 0.1/1.0 MB
+Progress (4): 131/435 kB | 114/268 kB | 89/843 kB | 0.1/1.0 MB
+Progress (4): 147/435 kB | 114/268 kB | 89/843 kB | 0.1/1.0 MB
+Progress (4): 147/435 kB | 118/268 kB | 89/843 kB | 0.1/1.0 MB
+Progress (4): 147/435 kB | 118/268 kB | 93/843 kB | 0.1/1.0 MB
+Progress (4): 147/435 kB | 122/268 kB | 93/843 kB | 0.1/1.0 MB
+Progress (4): 147/435 kB | 122/268 kB | 97/843 kB | 0.1/1.0 MB
+Progress (4): 147/435 kB | 127/268 kB | 97/843 kB | 0.1/1.0 MB
+Progress (4): 147/435 kB | 127/268 kB | 101/843 kB | 0.1/1.0 MB
+Progress (4): 147/435 kB | 127/268 kB | 105/843 kB | 0.1/1.0 MB
+Progress (4): 147/435 kB | 127/268 kB | 110/843 kB | 0.1/1.0 MB
+Progress (4): 147/435 kB | 127/268 kB | 114/843 kB | 0.1/1.0 MB
+Progress (4): 147/435 kB | 127/268 kB | 118/843 kB | 0.1/1.0 MB
+Progress (4): 147/435 kB | 127/268 kB | 122/843 kB | 0.1/1.0 MB
+Progress (4): 164/435 kB | 127/268 kB | 122/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 127/268 kB | 122/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 127/268 kB | 122/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 127/268 kB | 122/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 127/268 kB | 127/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 131/268 kB | 127/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 131/268 kB | 127/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 131/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 131/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 135/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 135/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 135/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 139/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 139/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 139/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 143/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 143/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 148/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 148/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 152/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 156/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 160/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 160/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 165/268 kB | 131/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 165/268 kB | 135/843 kB | 0.1/1.0 MB
+Progress (4): 180/435 kB | 169/268 kB | 135/843 kB | 0.1/1.0 MB
+Progress (4): 197/435 kB | 169/268 kB | 135/843 kB | 0.1/1.0 MB
+Progress (4): 197/435 kB | 169/268 kB | 135/843 kB | 0.1/1.0 MB
+Progress (4): 197/435 kB | 169/268 kB | 139/843 kB | 0.1/1.0 MB
+Progress (4): 197/435 kB | 173/268 kB | 139/843 kB | 0.1/1.0 MB
+Progress (4): 197/435 kB | 173/268 kB | 139/843 kB | 0.1/1.0 MB
+Progress (4): 197/435 kB | 173/268 kB | 144/843 kB | 0.1/1.0 MB
+Progress (4): 197/435 kB | 173/268 kB | 148/843 kB | 0.1/1.0 MB
+Progress (4): 213/435 kB | 173/268 kB | 148/843 kB | 0.1/1.0 MB
+Progress (4): 213/435 kB | 173/268 kB | 152/843 kB | 0.1/1.0 MB
+Progress (4): 213/435 kB | 177/268 kB | 152/843 kB | 0.1/1.0 MB
+Progress (4): 213/435 kB | 177/268 kB | 156/843 kB | 0.1/1.0 MB
+Progress (4): 213/435 kB | 181/268 kB | 156/843 kB | 0.1/1.0 MB
+Progress (4): 213/435 kB | 186/268 kB | 156/843 kB | 0.1/1.0 MB
+Progress (4): 213/435 kB | 190/268 kB | 156/843 kB | 0.1/1.0 MB
+Progress (4): 213/435 kB | 190/268 kB | 156/843 kB | 0.1/1.0 MB
+Progress (4): 213/435 kB | 190/268 kB | 160/843 kB | 0.1/1.0 MB
+Progress (4): 213/435 kB | 190/268 kB | 160/843 kB | 0.1/1.0 MB
+Progress (4): 229/435 kB | 190/268 kB | 160/843 kB | 0.1/1.0 MB
+Progress (4): 229/435 kB | 190/268 kB | 164/843 kB | 0.1/1.0 MB
+Progress (4): 229/435 kB | 190/268 kB | 168/843 kB | 0.1/1.0 MB
+Progress (4): 229/435 kB | 190/268 kB | 168/843 kB | 0.1/1.0 MB
+Progress (4): 229/435 kB | 190/268 kB | 173/843 kB | 0.1/1.0 MB
+Progress (4): 229/435 kB | 190/268 kB | 177/843 kB | 0.1/1.0 MB
+Progress (4): 229/435 kB | 190/268 kB | 181/843 kB | 0.1/1.0 MB
+Progress (4): 246/435 kB | 190/268 kB | 181/843 kB | 0.1/1.0 MB
+Progress (4): 246/435 kB | 190/268 kB | 185/843 kB | 0.1/1.0 MB
+Progress (4): 246/435 kB | 194/268 kB | 185/843 kB | 0.1/1.0 MB
+Progress (4): 262/435 kB | 194/268 kB | 185/843 kB | 0.1/1.0 MB
+Progress (4): 262/435 kB | 194/268 kB | 185/843 kB | 0.1/1.0 MB
+Progress (4): 262/435 kB | 194/268 kB | 185/843 kB | 0.1/1.0 MB
+Progress (4): 262/435 kB | 198/268 kB | 185/843 kB | 0.1/1.0 MB
+Progress (4): 262/435 kB | 198/268 kB | 185/843 kB | 0.1/1.0 MB
+Progress (4): 262/435 kB | 198/268 kB | 189/843 kB | 0.1/1.0 MB
+Progress (4): 262/435 kB | 203/268 kB | 189/843 kB | 0.1/1.0 MB
+Progress (4): 262/435 kB | 203/268 kB | 189/843 kB | 0.2/1.0 MB
+Progress (4): 262/435 kB | 203/268 kB | 194/843 kB | 0.2/1.0 MB
+Progress (4): 262/435 kB | 203/268 kB | 194/843 kB | 0.2/1.0 MB
+Progress (4): 262/435 kB | 203/268 kB | 198/843 kB | 0.2/1.0 MB
+Progress (4): 262/435 kB | 203/268 kB | 198/843 kB | 0.2/1.0 MB
+Progress (4): 262/435 kB | 203/268 kB | 202/843 kB | 0.2/1.0 MB
+Progress (4): 262/435 kB | 203/268 kB | 202/843 kB | 0.2/1.0 MB
+Progress (4): 262/435 kB | 207/268 kB | 202/843 kB | 0.2/1.0 MB
+Progress (4): 262/435 kB | 207/268 kB | 206/843 kB | 0.2/1.0 MB
+Progress (4): 262/435 kB | 207/268 kB | 206/843 kB | 0.2/1.0 MB
+Progress (4): 279/435 kB | 207/268 kB | 206/843 kB | 0.2/1.0 MB
+Progress (4): 279/435 kB | 211/268 kB | 206/843 kB | 0.2/1.0 MB
+Progress (4): 279/435 kB | 211/268 kB | 211/843 kB | 0.2/1.0 MB
+Progress (4): 279/435 kB | 211/268 kB | 211/843 kB | 0.2/1.0 MB
+Progress (4): 279/435 kB | 215/268 kB | 211/843 kB | 0.2/1.0 MB
+Progress (4): 279/435 kB | 215/268 kB | 215/843 kB | 0.2/1.0 MB
+Progress (4): 279/435 kB | 215/268 kB | 215/843 kB | 0.2/1.0 MB
+Progress (4): 279/435 kB | 219/268 kB | 215/843 kB | 0.2/1.0 MB
+Progress (4): 279/435 kB | 219/268 kB | 215/843 kB | 0.2/1.0 MB
+Progress (4): 279/435 kB | 224/268 kB | 215/843 kB | 0.2/1.0 MB
+Progress (4): 279/435 kB | 240/268 kB | 215/843 kB | 0.2/1.0 MB
+Progress (4): 295/435 kB | 240/268 kB | 215/843 kB | 0.2/1.0 MB
+Progress (4): 295/435 kB | 240/268 kB | 215/843 kB | 0.2/1.0 MB
+Progress (4): 295/435 kB | 240/268 kB | 219/843 kB | 0.2/1.0 MB
+Progress (4): 311/435 kB | 240/268 kB | 219/843 kB | 0.2/1.0 MB
+Progress (4): 311/435 kB | 240/268 kB | 219/843 kB | 0.2/1.0 MB
+Progress (4): 311/435 kB | 240/268 kB | 223/843 kB | 0.2/1.0 MB
+Progress (4): 311/435 kB | 256/268 kB | 223/843 kB | 0.2/1.0 MB
+Progress (4): 328/435 kB | 256/268 kB | 223/843 kB | 0.2/1.0 MB
+Progress (4): 328/435 kB | 256/268 kB | 240/843 kB | 0.2/1.0 MB
+Progress (4): 328/435 kB | 256/268 kB | 240/843 kB | 0.2/1.0 MB
+Progress (4): 328/435 kB | 256/268 kB | 240/843 kB | 0.2/1.0 MB
+Progress (4): 344/435 kB | 256/268 kB | 240/843 kB | 0.2/1.0 MB
+Progress (4): 344/435 kB | 256/268 kB | 240/843 kB | 0.2/1.0 MB
+Progress (4): 344/435 kB | 256/268 kB | 240/843 kB | 0.2/1.0 MB
+Progress (4): 344/435 kB | 256/268 kB | 256/843 kB | 0.2/1.0 MB
+Progress (4): 344/435 kB | 268 kB | 256/843 kB | 0.2/1.0 MB    
+Progress (4): 344/435 kB | 268 kB | 256/843 kB | 0.2/1.0 MB
+Progress (4): 344/435 kB | 268 kB | 256/843 kB | 0.2/1.0 MB
+Progress (4): 344/435 kB | 268 kB | 256/843 kB | 0.2/1.0 MB
+Progress (4): 360/435 kB | 268 kB | 256/843 kB | 0.2/1.0 MB
+Progress (4): 360/435 kB | 268 kB | 256/843 kB | 0.2/1.0 MB
+                                                           
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/1.5.8/plexus-utils-1.5.8.jar (268 kB at 224 kB/s)
+Progress (3): 360/435 kB | 272/843 kB | 0.2/1.0 MB
+Progress (3): 360/435 kB | 272/843 kB | 0.3/1.0 MB
+Progress (3): 360/435 kB | 287/843 kB | 0.3/1.0 MB
+Progress (3): 377/435 kB | 287/843 kB | 0.3/1.0 MB
+Progress (3): 377/435 kB | 287/843 kB | 0.3/1.0 MB
+Progress (3): 377/435 kB | 303/843 kB | 0.3/1.0 MB
+Progress (3): 377/435 kB | 319/843 kB | 0.3/1.0 MB
+Progress (3): 393/435 kB | 319/843 kB | 0.3/1.0 MB
+Progress (3): 393/435 kB | 319/843 kB | 0.3/1.0 MB
+Progress (3): 410/435 kB | 319/843 kB | 0.3/1.0 MB
+Progress (3): 426/435 kB | 319/843 kB | 0.3/1.0 MB
+Progress (3): 426/435 kB | 319/843 kB | 0.3/1.0 MB
+Progress (3): 435 kB | 319/843 kB | 0.3/1.0 MB    
+                                              
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/3.2.5/spring-boot-loader-tools-3.2.5.jar (435 kB at 311 kB/s)
+Progress (2): 319/843 kB | 0.3/1.0 MB
+Progress (2): 336/843 kB | 0.3/1.0 MB
+Progress (2): 352/843 kB | 0.3/1.0 MB
+Progress (2): 364/843 kB | 0.3/1.0 MB
+Progress (2): 380/843 kB | 0.3/1.0 MB
+Progress (2): 380/843 kB | 0.3/1.0 MB
+Progress (2): 396/843 kB | 0.3/1.0 MB
+Progress (2): 396/843 kB | 0.3/1.0 MB
+Progress (2): 396/843 kB | 0.4/1.0 MB
+Progress (2): 413/843 kB | 0.4/1.0 MB
+Progress (2): 413/843 kB | 0.4/1.0 MB
+Progress (2): 429/843 kB | 0.4/1.0 MB
+Progress (2): 429/843 kB | 0.4/1.0 MB
+Progress (2): 446/843 kB | 0.4/1.0 MB
+Progress (2): 446/843 kB | 0.4/1.0 MB
+Progress (2): 462/843 kB | 0.4/1.0 MB
+Progress (2): 462/843 kB | 0.4/1.0 MB
+Progress (2): 478/843 kB | 0.4/1.0 MB
+Progress (2): 478/843 kB | 0.4/1.0 MB
+Progress (2): 495/843 kB | 0.4/1.0 MB
+Progress (2): 495/843 kB | 0.5/1.0 MB
+Progress (2): 511/843 kB | 0.5/1.0 MB
+Progress (2): 511/843 kB | 0.5/1.0 MB
+Progress (2): 527/843 kB | 0.5/1.0 MB
+Progress (2): 527/843 kB | 0.5/1.0 MB
+Progress (2): 544/843 kB | 0.5/1.0 MB
+Progress (2): 544/843 kB | 0.5/1.0 MB
+Progress (2): 560/843 kB | 0.5/1.0 MB
+Progress (2): 577/843 kB | 0.5/1.0 MB
+Progress (2): 577/843 kB | 0.5/1.0 MB
+Progress (2): 593/843 kB | 0.5/1.0 MB
+Progress (2): 593/843 kB | 0.5/1.0 MB
+Progress (2): 609/843 kB | 0.5/1.0 MB
+Progress (2): 626/843 kB | 0.5/1.0 MB
+Progress (2): 642/843 kB | 0.5/1.0 MB
+Progress (2): 642/843 kB | 0.6/1.0 MB
+Progress (2): 642/843 kB | 0.6/1.0 MB
+Progress (2): 658/843 kB | 0.6/1.0 MB
+Progress (2): 675/843 kB | 0.6/1.0 MB
+Progress (2): 675/843 kB | 0.6/1.0 MB
+Progress (2): 691/843 kB | 0.6/1.0 MB
+Progress (2): 691/843 kB | 0.6/1.0 MB
+Progress (2): 708/843 kB | 0.6/1.0 MB
+Progress (2): 708/843 kB | 0.6/1.0 MB
+Progress (2): 708/843 kB | 0.6/1.0 MB
+Progress (2): 724/843 kB | 0.6/1.0 MB
+Progress (2): 724/843 kB | 0.7/1.0 MB
+Progress (2): 740/843 kB | 0.7/1.0 MB
+Progress (2): 740/843 kB | 0.7/1.0 MB
+Progress (2): 757/843 kB | 0.7/1.0 MB
+Progress (2): 757/843 kB | 0.7/1.0 MB
+Progress (2): 773/843 kB | 0.7/1.0 MB
+Progress (2): 773/843 kB | 0.7/1.0 MB
+Progress (2): 790/843 kB | 0.7/1.0 MB
+Progress (2): 790/843 kB | 0.7/1.0 MB
+Progress (2): 806/843 kB | 0.7/1.0 MB
+Progress (2): 822/843 kB | 0.7/1.0 MB
+Progress (2): 822/843 kB | 0.7/1.0 MB
+Progress (2): 822/843 kB | 0.8/1.0 MB
+Progress (2): 839/843 kB | 0.8/1.0 MB
+Progress (2): 843 kB | 0.8/1.0 MB    
+Progress (2): 843 kB | 0.8/1.0 MB
+Progress (2): 843 kB | 0.8/1.0 MB
+Progress (2): 843 kB | 0.8/1.0 MB
+                                 
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.2.3/httpclient5-5.2.3.jar (843 kB at 313 kB/s)
+Progress (1): 0.8/1.0 MB
+Progress (1): 0.8/1.0 MB
+Progress (1): 0.9/1.0 MB
+Progress (1): 0.9/1.0 MB
+Progress (1): 0.9/1.0 MB
+Progress (1): 0.9/1.0 MB
+Progress (1): 0.9/1.0 MB
+Progress (1): 0.9/1.0 MB
+Progress (1): 1.0/1.0 MB
+Progress (1): 1.0/1.0 MB
+Progress (1): 1.0/1.0 MB
+Progress (1): 1.0/1.0 MB
+Progress (1): 1.0/1.0 MB
+Progress (1): 1.0 MB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.21/commons-compress-1.21.jar (1.0 MB at 328 kB/s)
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2026-04-14 12:51:21 [restartedMain] INFO  c.c.events.CollegeEventsApplication - Starting CollegeEventsApplication using Java 25.0.2 with PID 15284 (C:\Users\NITISH KUMAR\OneDrive\Desktop\college-events-project\college-events\target\classes started by NITISH KUMAR in C:\Users\NITISH KUMAR\OneDrive\Desktop\college-events-project\college-events)
+2026-04-14 12:51:21 [restartedMain] DEBUG c.c.events.CollegeEventsApplication - Running with Spring Boot v3.2.5, Spring v6.1.6
+2026-04-14 12:51:21 [restartedMain] INFO  c.c.events.CollegeEventsApplication - The following 1 profile is active: "h2"
+2026-04-14 12:51:21 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-04-14 12:51:21 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-04-14 12:51:22 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-14 12:51:22 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 57 ms. Found 5 JPA repository interfaces.
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (file:/C:/Users/NITISH%20KUMAR/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.20/tomcat-embed-core-10.1.20.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+2026-04-14 12:51:22 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-04-14 12:51:22 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-14 12:51:22 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-04-14 12:51:22 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-14 12:51:22 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1125 ms
+2026-04-14 12:51:22 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-14 12:51:22 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:file:./data/college_events user=SA
+2026-04-14 12:51:22 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-04-14 12:51:22 [restartedMain] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:file:./data/college_events'
+2026-04-14 12:51:23 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-14 12:51:23 [restartedMain] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-04-14 12:51:23 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-04-14 12:51:23 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-14 12:51:23 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-04-14 12:51:24 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-14 12:51:24 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-14 12:51:24 [restartedMain] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-04-14 12:51:25 [restartedMain] INFO  c.college.events.config.WebMvcConfig - Serving uploads from: file:///C:/Users/NITISH%20KUMAR/OneDrive/Desktop/college-events-project/college-events/uploads/events/
+2026-04-14 12:51:25 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-04-14 12:51:25 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-04-14 12:51:25 [restartedMain] INFO  c.c.events.CollegeEventsApplication - Started CollegeEventsApplication in 4.284 seconds (process running for 4.746)
+2026-04-14 12:54:47 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-14 12:54:47 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-04-14 12:54:47 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2026-04-14 12:57:08 [http-nio-8080-exec-1] INFO  c.college.events.service.UserService - Toggled status for user nitish.work098@gmail.com: enabled=false
+2026-04-14 12:57:12 [http-nio-8080-exec-6] INFO  c.college.events.service.UserService - Toggled status for user nitish.work098@gmail.com: enabled=true
+2026-04-14 13:00:32 [http-nio-8080-exec-1] INFO  c.college.events.service.UserService - Registered new user: student@123.com as STUDENT
+2026-04-14 13:01:15 [http-nio-8080-exec-3] INFO  c.c.e.service.RegistrationService - User student@123.com registered for event 'ANNANT KHEL' with status REGISTERED
+2026-04-14 13:01:15 [task-1] WARN  c.c.events.service.EmailService - Email not configured. Skipping email to student@123.com: Γ£à Registration Confirmed ΓÇô ANNANT KHEL
+2026-04-14 13:01:15 [task-1] INFO  c.c.events.service.EmailService - Registration confirmation email sent to student@123.com
+2026-04-14 13:04:55 [http-nio-8080-exec-3] INFO  c.c.e.service.RegistrationService - User student@123.com registered for event 'Test Event' with status REGISTERED
+2026-04-14 13:04:55 [task-2] WARN  c.c.events.service.EmailService - Email not configured. Skipping email to student@123.com: Γ£à Registration Confirmed ΓÇô Test Event
+2026-04-14 13:04:55 [task-2] INFO  c.c.events.service.EmailService - Registration confirmation email sent to student@123.com
+2026-04-14 13:07:54 [http-nio-8080-exec-7] INFO  c.college.events.service.UserService - Registered new user: organizer@123.com as ORGANIZER
+2026-04-14 13:08:36 [http-nio-8080-exec-7] INFO  c.college.events.service.UserService - Updated profile for user: organizer@123.com
+2026-04-14 13:51:09 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-04-14 13:51:09 [Thread-6] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-14 13:51:09 [Thread-6] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-04-14 13:51:09 [Thread-6] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2026-04-14 13:51:09 [restartedMain] INFO  c.c.events.CollegeEventsApplication - Starting CollegeEventsApplication using Java 25.0.2 with PID 15284 (C:\Users\NITISH KUMAR\OneDrive\Desktop\college-events-project\college-events\target\classes started by NITISH KUMAR in C:\Users\NITISH KUMAR\OneDrive\Desktop\college-events-project\college-events)
+2026-04-14 13:51:09 [restartedMain] DEBUG c.c.events.CollegeEventsApplication - Running with Spring Boot v3.2.5, Spring v6.1.6
+2026-04-14 13:51:09 [restartedMain] INFO  c.c.events.CollegeEventsApplication - The following 1 profile is active: "h2"
+2026-04-14 13:51:09 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-14 13:51:09 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 12 ms. Found 5 JPA repository interfaces.
+2026-04-14 13:51:09 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-04-14 13:51:09 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-14 13:51:09 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-04-14 13:51:09 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-14 13:51:09 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 292 ms
+2026-04-14 13:51:09 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-04-14 13:51:09 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection conn14: url=jdbc:h2:file:./data/college_events user=SA
+2026-04-14 13:51:09 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-04-14 13:51:09 [restartedMain] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:file:./data/college_events'
+2026-04-14 13:51:09 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-14 13:51:09 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-04-14 13:51:09 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-14 13:51:09 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-04-14 13:51:09 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-14 13:51:09 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-14 13:51:10 [restartedMain] INFO  c.college.events.config.WebMvcConfig - Serving uploads from: file:///C:/Users/NITISH%20KUMAR/OneDrive/Desktop/college-events-project/college-events/uploads/events/
+2026-04-14 13:51:10 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-04-14 13:51:10 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-04-14 13:51:10 [restartedMain] INFO  c.c.events.CollegeEventsApplication - Started CollegeEventsApplication in 0.764 seconds (process running for 3589.311)
+2026-04-14 13:51:10 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-04-14 13:56:38 [http-nio-8080-exec-2] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-14 13:56:38 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-04-14 13:56:38 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2026-04-14 13:59:48 [http-nio-8080-exec-1] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23503, SQLState: 23503
+2026-04-14 13:59:48 [http-nio-8080-exec-1] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - Referential integrity constraint violation: "FK8MI58JT1S8FXMI56JNAU0CXQW: PUBLIC.REGISTRATIONS FOREIGN KEY(EVENT_ID) REFERENCES PUBLIC.EVENTS(ID) (CAST(1 AS BIGINT))"; SQL statement:
+/* delete for com.college.eve [23503-224]
+2026-04-14 14:02:08 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 44 class path changes (0 additions, 42 deletions, 2 modifications)
+2026-04-14 14:02:08 [Thread-8] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-14 14:02:08 [Thread-8] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2026-04-14 14:02:08 [Thread-8] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2026-04-14 14:02:08 [restartedMain] INFO  c.c.events.CollegeEventsApplication - Starting CollegeEventsApplication using Java 25.0.2 with PID 15284 (C:\Users\NITISH KUMAR\OneDrive\Desktop\college-events-project\college-events\target\classes started by NITISH KUMAR in C:\Users\NITISH KUMAR\OneDrive\Desktop\college-events-project\college-events)
+2026-04-14 14:02:08 [restartedMain] DEBUG c.c.events.CollegeEventsApplication - Running with Spring Boot v3.2.5, Spring v6.1.6
+2026-04-14 14:02:08 [restartedMain] INFO  c.c.events.CollegeEventsApplication - The following 1 profile is active: "h2"
+2026-04-14 14:02:09 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-14 14:02:09 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 0 ms. Found 0 JPA repository interfaces.
+2026-04-14 14:02:09 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-04-14 14:02:09 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-14 14:02:09 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-04-14 14:02:09 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-14 14:02:09 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 185 ms
+2026-04-14 14:02:09 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Starting...
+2026-04-14 14:02:09 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-3 - Added connection conn19: url=jdbc:h2:file:./data/college_events user=SA
+2026-04-14 14:02:09 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Start completed.
+2026-04-14 14:02:09 [restartedMain] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:file:./data/college_events'
+2026-04-14 14:02:09 [restartedMain] ERROR o.a.catalina.session.StandardManager - Exception loading sessions from persistent storage
+java.lang.ClassNotFoundException: com.college.events.model.User
+	at org.springframework.boot.web.embedded.tomcat.TomcatEmbeddedWebappClassLoader.loadClass(TomcatEmbeddedWebappClassLoader.java:72) ~[spring-boot-3.2.5.jar:3.2.5]
+	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1165) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at java.base/java.lang.Class.forName0(Native Method) ~[na:na]
+	at java.base/java.lang.Class.forName(Class.java:547) ~[na:na]
+	at org.apache.catalina.util.CustomObjectInputStream.resolveClass(CustomObjectInputStream.java:158) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at java.base/java.io.ObjectInputStream.readNonProxyDesc(ObjectInputStream.java:1912) ~[na:na]
+	at java.base/java.io.ObjectInputStream.readClassDesc(ObjectInputStream.java:1785) ~[na:na]
+	at java.base/java.io.ObjectInputStream.readOrdinaryObject(ObjectInputStream.java:2101) ~[na:na]
+	at java.base/java.io.ObjectInputStream.readObject0(ObjectInputStream.java:1620) ~[na:na]
+	at java.base/java.io.ObjectInputStream$FieldValues.<init>(ObjectInputStream.java:2480) ~[na:na]
+	at java.base/java.io.ObjectInputStream.readSerialData(ObjectInputStream.java:2327) ~[na:na]
+	at java.base/java.io.ObjectInputStream.readOrdinaryObject(ObjectInputStream.java:2133) ~[na:na]
+	at java.base/java.io.ObjectInputStream.readObject0(ObjectInputStream.java:1620) ~[na:na]
+	at java.base/java.io.ObjectInputStream$FieldValues.<init>(ObjectInputStream.java:2480) ~[na:na]
+	at java.base/java.io.ObjectInputStream.readSerialData(ObjectInputStream.java:2327) ~[na:na]
+	at java.base/java.io.ObjectInputStream.readOrdinaryObject(ObjectInputStream.java:2133) ~[na:na]
+	at java.base/java.io.ObjectInputStream.readObject0(ObjectInputStream.java:1620) ~[na:na]
+	at java.base/java.io.ObjectInputStream.readObject(ObjectInputStream.java:487) ~[na:na]
+	at java.base/java.io.ObjectInputStream.readObject(ObjectInputStream.java:445) ~[na:na]
+	at org.apache.catalina.session.StandardSession.doReadObject(StandardSession.java:1415) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.session.StandardSession.readObjectData(StandardSession.java:985) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.session.StandardManager.doLoad(StandardManager.java:210) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.session.StandardManager.load(StandardManager.java:156) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.session.StandardManager.startInternal(StandardManager.java:346) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4907) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1332) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1322) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328) ~[na:na]
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:149) ~[na:na]
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:866) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:845) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1332) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1322) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328) ~[na:na]
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:149) ~[na:na]
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:866) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:240) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:433) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:921) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.apache.catalina.startup.Tomcat.start(Tomcat.java:437) ~[tomcat-embed-core-10.1.20.jar:10.1.20]
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.initialize(TomcatWebServer.java:126) ~[spring-boot-3.2.5.jar:3.2.5]
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.<init>(TomcatWebServer.java:105) ~[spring-boot-3.2.5.jar:3.2.5]
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getTomcatWebServer(TomcatServletWebServerFactory.java:499) ~[spring-boot-3.2.5.jar:3.2.5]
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getWebServer(TomcatServletWebServerFactory.java:218) ~[spring-boot-3.2.5.jar:3.2.5]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.createWebServer(ServletWebServerApplicationContext.java:188) ~[spring-boot-3.2.5.jar:3.2.5]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.onRefresh(ServletWebServerApplicationContext.java:162) ~[spring-boot-3.2.5.jar:3.2.5]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:618) ~[spring-context-6.1.6.jar:6.1.6]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.2.5.jar:3.2.5]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754) ~[spring-boot-3.2.5.jar:3.2.5]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456) ~[spring-boot-3.2.5.jar:3.2.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334) ~[spring-boot-3.2.5.jar:3.2.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354) ~[spring-boot-3.2.5.jar:3.2.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1343) ~[spring-boot-3.2.5.jar:3.2.5]
+	at com.college.events.CollegeEventsApplication.main(CollegeEventsApplication.java:9) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.2.5.jar:3.2.5]
+2026-04-14 14:02:09 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-14 14:02:09 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-04-14 14:02:09 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-14 14:02:09 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-04-14 14:02:09 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-14 14:02:09 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-14 14:02:09 [restartedMain] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 16ba72a9-032f-44e4-a008-8f8564b218da
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-14 14:02:09 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-04-14 14:02:09 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-04-14 14:02:09 [restartedMain] INFO  c.c.events.CollegeEventsApplication - Started CollegeEventsApplication in 0.475 seconds (process running for 4248.608)
+2026-04-14 14:02:09 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+   SpringBootWebSecurityConfiguration.SecurityFilterChainConfiguration matched:
+      - AllNestedConditions 2 matched 0 did not; NestedCondition on DefaultWebSecurityCondition.Beans @ConditionalOnMissingBean (types: org.springframework.security.web.SecurityFilterChain; SearchStrategy: all) did not find any beans; NestedCondition on DefaultWebSecurityCondition.Classes @ConditionalOnClass found required classes 'org.springframework.security.web.SecurityFilterChain', 'org.springframework.security.config.annotation.web.builders.HttpSecurity' (DefaultWebSecurityCondition)
+
+   SpringBootWebSecurityConfiguration.WebSecurityEnablerConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.config.annotation.web.configuration.EnableWebSecurity' (OnClassCondition)
+      - @ConditionalOnMissingBean (names: springSecurityFilterChain; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   UserDetailsServiceAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.authentication.AuthenticationManager' (OnClassCondition)
+      - AnyNestedCondition 1 matched 2 did not; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.PasswordConfigured @ConditionalOnProperty (spring.security.user.password) did not find property 'password'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.NameConfigured @ConditionalOnProperty (spring.security.user.name) did not find property 'name'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.MissingAlternative @ConditionalOnMissingClass did not find unwanted classes 'org.springframework.security.oauth2.client.registration.ClientRegistrationRepository', 'org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector', 'org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository' (UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured)
+      - @ConditionalOnBean (types: org.springframework.security.config.annotation.ObjectPostProcessor; SearchStrategy: all) found bean 'objectPostProcessor'; @ConditionalOnMissingBean (types: org.springframework.security.authentication.AuthenticationManager,org.springframework.security.authentication.AuthenticationProvider,org.springframework.security.core.userdetails.UserDetailsService,org.springframework.security.authentication.AuthenticationManagerResolver,org.springframework.security.oauth2.jwt.JwtDecoder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+
+Negative matches:
+-----------------
+
+    None
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-04-14 14:02:11 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 45 class path changes (45 additions, 0 deletions, 0 modifications)
+2026-04-14 14:02:11 [Thread-12] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-14 14:02:11 [Thread-12] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown initiated...
+2026-04-14 14:02:11 [Thread-12] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2026-04-14 14:02:11 [restartedMain] INFO  c.c.events.CollegeEventsApplication - Starting CollegeEventsApplication using Java 25.0.2 with PID 15284 (C:\Users\NITISH KUMAR\OneDrive\Desktop\college-events-project\college-events\target\classes started by NITISH KUMAR in C:\Users\NITISH KUMAR\OneDrive\Desktop\college-events-project\college-events)
+2026-04-14 14:02:11 [restartedMain] DEBUG c.c.events.CollegeEventsApplication - Running with Spring Boot v3.2.5, Spring v6.1.6
+2026-04-14 14:02:11 [restartedMain] INFO  c.c.events.CollegeEventsApplication - The following 1 profile is active: "h2"
+2026-04-14 14:02:11 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-14 14:02:11 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 12 ms. Found 5 JPA repository interfaces.
+2026-04-14 14:02:11 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-04-14 14:02:11 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-14 14:02:11 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-04-14 14:02:11 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-14 14:02:11 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 241 ms
+2026-04-14 14:02:11 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Starting...
+2026-04-14 14:02:11 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-4 - Added connection conn24: url=jdbc:h2:file:./data/college_events user=SA
+2026-04-14 14:02:11 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Start completed.
+2026-04-14 14:02:11 [restartedMain] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:file:./data/college_events'
+2026-04-14 14:02:11 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-14 14:02:11 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-04-14 14:02:11 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-14 14:02:11 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-04-14 14:02:11 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-14 14:02:11 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-14 14:02:11 [restartedMain] INFO  c.college.events.config.WebMvcConfig - Serving uploads from: file:///C:/Users/NITISH%20KUMAR/OneDrive/Desktop/college-events-project/college-events/uploads/events/
+2026-04-14 14:02:12 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-04-14 14:02:12 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-04-14 14:02:12 [restartedMain] INFO  c.c.events.CollegeEventsApplication - Started CollegeEventsApplication in 0.746 seconds (process running for 4251.22)
+2026-04-14 14:02:12 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+   TaskSchedulingAutoConfiguration#scheduledBeanLazyInitializationExcludeFilter matched:
+      - @ConditionalOnBean (names: org.springframework.context.annotation.internalScheduledAnnotationProcessor; SearchStrategy: all) found bean 'org.springframework.context.annotation.internalScheduledAnnotationProcessor' (OnBeanCondition)
+
+   TaskSchedulingConfigurations.TaskSchedulerConfiguration matched:
+      - @ConditionalOnBean (names: org.springframework.context.annotation.internalScheduledAnnotationProcessor; SearchStrategy: all) found bean 'org.springframework.context.annotation.internalScheduledAnnotationProcessor'; @ConditionalOnMissingBean (types: org.springframework.scheduling.TaskScheduler,java.util.concurrent.ScheduledExecutorService; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TaskSchedulingConfigurations.TaskSchedulerConfiguration#taskScheduler matched:
+      - @ConditionalOnThreading found PLATFORM (OnThreadingCondition)
+
+
+Negative matches:
+-----------------
+
+   SpringBootWebSecurityConfiguration.SecurityFilterChainConfiguration:
+      Did not match:
+         - AllNestedConditions 1 matched 1 did not; NestedCondition on DefaultWebSecurityCondition.Beans @ConditionalOnMissingBean (types: org.springframework.security.web.SecurityFilterChain; SearchStrategy: all) found beans of type 'org.springframework.security.web.SecurityFilterChain' filterChain; NestedCondition on DefaultWebSecurityCondition.Classes @ConditionalOnClass found required classes 'org.springframework.security.web.SecurityFilterChain', 'org.springframework.security.config.annotation.web.builders.HttpSecurity' (DefaultWebSecurityCondition)
+
+   SpringBootWebSecurityConfiguration.WebSecurityEnablerConfiguration:
+      Did not match:
+         - @ConditionalOnMissingBean (names: springSecurityFilterChain; SearchStrategy: all) found beans named springSecurityFilterChain (OnBeanCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.security.config.annotation.web.configuration.EnableWebSecurity' (OnClassCondition)
+
+   TaskSchedulingConfigurations.TaskSchedulerConfiguration#taskSchedulerVirtualThreads:
+      Did not match:
+         - @ConditionalOnThreading did not find VIRTUAL (OnThreadingCondition)
+
+   UserDetailsServiceAutoConfiguration:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.security.authentication.AuthenticationManager,org.springframework.security.authentication.AuthenticationProvider,org.springframework.security.core.userdetails.UserDetailsService,org.springframework.security.authentication.AuthenticationManagerResolver,org.springframework.security.oauth2.jwt.JwtDecoder; SearchStrategy: all) found beans of type 'org.springframework.security.core.userdetails.UserDetailsService' userService and found beans of type 'org.springframework.security.authentication.AuthenticationProvider' authenticationProvider (OnBeanCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.security.authentication.AuthenticationManager' (OnClassCondition)
+         - AnyNestedCondition 1 matched 2 did not; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.PasswordConfigured @ConditionalOnProperty (spring.security.user.password) did not find property 'password'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.NameConfigured @ConditionalOnProperty (spring.security.user.name) did not find property 'name'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.MissingAlternative @ConditionalOnMissingClass did not find unwanted classes 'org.springframework.security.oauth2.client.registration.ClientRegistrationRepository', 'org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector', 'org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository' (UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured)
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-04-14 14:03:59 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-14 14:03:59 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-04-14 14:03:59 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2026-04-14 14:08:32 [task-1] WARN  c.c.events.service.EmailService - Email not configured. Skipping email to nitishkumar9898kashi@gmail.com: Registration Cancelled ΓÇô ANNANT KHEL
+2026-04-14 14:08:32 [http-nio-8080-exec-10] INFO  c.c.e.service.RegistrationService - User nitishkumar9898kashi@gmail.com cancelled registration 2 for event 'ANNANT KHEL'
+2026-04-14 14:12:15 [http-nio-8080-exec-1] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'POST' is not supported]
+2026-04-14 14:12:28 [http-nio-8080-exec-5] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'POST' is not supported]
+2026-04-14 14:15:19 [http-nio-8080-exec-5] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'POST' is not supported]

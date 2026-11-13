@@ -1,0 +1,30 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: college-events/Dockerfile
+    container_name: eventhub-app
+    restart: always
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    env_file:
+      - .env
+    volumes:
+      - pulse-data:/app/data
+      - pulse-uploads:/app/uploads
+      - pulse-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  pulse-data:
+  pulse-uploads:
+  pulse-logs:
+
+networks:
+  default:
+    name: eventhub-network

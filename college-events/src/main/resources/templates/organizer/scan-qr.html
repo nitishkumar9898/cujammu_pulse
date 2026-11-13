@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>QR Scanner — CUJAMMU PULSE</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+<style>
+  body { background-color: #0f172a; color: #fff; overflow-x: hidden; } 
+  
+  .scanner-container-box { width: 100%; max-width: 450px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
+
+  .scanner-wrapper {
+    position: relative; width: 100%; aspect-ratio: 1 / 1; background: #000; overflow: hidden; 
+    border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  #qr-reader { width: 100%; height: 100%; border: none !important; }
+  #qr-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+
+  .scanner-overlay {
+    position: absolute; top: 50%; left: 50%; width: 280px; height: 280px; transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5); border-radius: 20px; border: 3px solid rgba(16, 185, 129, 0.8);
+    pointer-events: none; z-index: 10;
+  }
+  
+  .scanner-laser {
+    width: 100%; height: 3px; background: #10B981; position: absolute; top: 0; left: 0;
+    box-shadow: 0 0 15px #10B981; animation: scanLaser 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  @keyframes scanLaser { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+  .flash-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-out; }
+  .flash-green { background-color: rgba(16, 185, 129, 0.9); opacity: 1; }
+  .flash-red { background-color: rgba(239, 68, 68, 0.9); opacity: 1; }
+
+  .cam-controls { position: absolute; top: 15px; right: 15px; z-index: 20; display: flex; flex-direction: column; gap: 8px; }
+  .cam-btn { 
+    width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.6); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center; color: white; border: 1px solid rgba(255,255,255,0.2);
+    font-size: 1.2rem; transition: all 0.2s;
+  }
+  .cam-btn:hover { background: rgba(0,0,0,0.8); }
+  .cam-btn.active { background: #f59e0b; color: #000; border-color: #f59e0b; }
+  
+  #zoomSliderContainer { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); z-index: 20; width: 80%; }
+
+  .action-btn {
+    color: white; border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px; padding: 14px; font-weight: 600; font-size: 1.1rem;
+    transition: all 0.2s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  .capture-btn { background: #3b82f6; border-color: #60a5fa; }
+  .capture-btn:hover { background: #2563eb; transform: translateY(-2px); }
+  
+  .gallery-btn { background: #1e293b; }
+  .gallery-btn:hover { background: #334155; transform: translateY(-2px); }
+
+  .result-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); z-index: 10000; opacity: 0; pointer-events: none; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: #fff; color: #000; border-radius: 20px; padding: 2rem; text-align: center; width: 90%; max-width: 320px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+  .result-popup.show { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+  .result-icon { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1rem; }
+  .icon-success { background: #d1fae5; color: #10b981; }
+  .icon-error { background: #fee2e2; color: #ef4444; }
+
+  #confettiCanvas { position: fixed; top:0; left:0; width: 100%; height: 100%; z-index: 10001; pointer-events: none; }
+  
+  .camera-selector { background: rgba(0,0,0,0.8); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 4px 8px; font-size: 0.8rem; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: organizerSidebar(activePage='events')}"></div>
+<div class="main-content scan-bg">
+  
+  <div class="d-flex justify-content-between align-items-center p-3 text-white border-bottom border-secondary border-opacity-25 mb-3">
+     <div class="d-flex align-items-center gap-2">
+         <a th:href="'/organizer/events/' + ${event.id} + '/registrations'" class="text-white"><i class="bi bi-arrow-left fs-4"></i></a>
+         <h5 class="mb-0 fw-bold">Live Scanner</h5>
+     </div>
+     <div class="badge bg-dark bg-opacity-75 px-3 py-2 rounded-pill d-flex align-items-center gap-2">
+         <div class="spinner-grow spinner-grow-sm text-success scanner-status-dot" role="status"></div>
+         <span id="scanStatusText">Initializing...</span>
+     </div>
+  </div>
+
+  <div class="px-3 pb-5">
+    <div class="scanner-container-box">
+        
+        <div class="d-flex justify-content-between align-items-center text-white bg-dark bg-opacity-50 rounded-4 p-3 shadow-sm border border-secondary border-opacity-25">
+            <div>
+               <small class="text-white-50 d-block fw-semibold text-uppercase letter-spacing-wide">Attended</small>
+               <h3 class="mb-0 fw-bold text-success"><span id="attendedCount" th:text="${attendedCount ?: 0}">0</span> <small class="text-white-50 fs-5">/ <span th:text="${registeredCount ?: 0}"></span></small></h3>
+            </div>
+            <div class="text-end">
+               <small class="text-white-50 d-block fw-semibold text-uppercase letter-spacing-wide">Event</small>
+               <h6 class="mb-0 fw-bold text-truncate event-title-truncate" th:text="${event.title}">Event Name</h6>
+            </div>
+        </div>
+
+        <div class="scanner-wrapper">
+            <div id="qr-reader"></div>
+            
+            <div class="scanner-overlay" id="scannerOverlayBox">
+                <div class="scanner-laser"></div>
+            </div>
+
+            <div class="cam-controls">
+                <button id="torchBtn" class="cam-btn d-none shadow" onclick="toggleTorch()" title="Toggle Flashlight">
+                   <i class="bi bi-lightning-charge-fill"></i>
+                </button>
+                <button id="switchCamBtn" class="cam-btn d-none shadow" onclick="switchCamera()" title="Switch Camera">
+                    <i class="bi bi-camera-rotate"></i>
+                </button>
+            </div>
+            
+            <div id="zoomSliderContainer" class="d-none">
+               <div class="d-flex align-items-center gap-2 bg-dark bg-opacity-75 px-3 py-2 rounded-pill shadow backdrop-blur">
+                   <i class="bi bi-zoom-out text-white small"></i>
+                   <input type="range" class="form-range" id="zoomSlider" min="1" max="5" step="0.1" value="1" title="Adjust Zoom">
+                   <i class="bi bi-zoom-in text-white small"></i>
+               </div>
+            </div>
+
+            <div class="flash-overlay" id="flashOverlay"></div>
+        </div>
+
+        <div class="mt-2 d-flex flex-column gap-2">
+            <button onclick="captureAndScan()" class="action-btn capture-btn shadow-lg">
+                <i class="bi bi-camera-fill fs-4"></i> Capture & Scan QR
+            </button>
+            
+            <button onclick="document.getElementById('galleryInput').click()" class="action-btn gallery-btn">
+                <i class="bi bi-image fs-4"></i> Upload QR from Gallery
+            </button>
+            <input type="file" id="galleryInput" accept="image/*" class="d-none" title="Upload QR Image">
+        </div>
+
+        <div class="input-group mt-3">
+            <input type="text" id="manualToken" class="form-control bg-dark bg-opacity-50 text-white border-secondary p-3" placeholder="Paste manual token..." autocomplete="off" title="Manual Token Input">
+            <button class="btn btn-secondary border-secondary px-4 fw-bold" onclick="submitManualToken()">Verify</button>
+        </div>
+        
+        <select id="cameraSelect" class="camera-selector d-none" onchange="changeCamera(this.value)" title="Select Camera"></select>
+        <div id="qr-reader-hidden" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="result-popup" id="resultPopup">
+    <div class="result-icon icon-success" id="resultIcon">
+        <i class="bi bi-check-lg" id="resultIconInner"></i>
+    </div>
+    <h4 class="fw-bold mb-1" id="resultTitle">Verified!</h4>
+    <p class="text-muted mb-4 small" id="resultMessage">Student Name</p>
+    <button class="btn btn-dark w-100 rounded-pill py-2 fw-bold" onclick="hidePopupAndResume()">Continue Scanning</button>
+</div>
+
+<canvas id="confettiCanvas"></canvas>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script th:replace="~{fragments/navbar :: sidebarJs}"></script>
+<script th:inline="javascript">
+  const eventId = /*[[${event.id}]]*/ 0;
+  const csrfToken = /*[[${_csrf.token}]]*/ '';
+  const csrfHeader = /*[[${_csrf.headerName}]]*/ 'X-CSRF-TOKEN';
+
+  let html5QrCode = null;
+  let isProcessingScan = false;
+  let torchOn = false;
+  let currentCameraId = null;
+  let allCameras = [];
+
+  function initScanner() {
+    const statusText = document.getElementById('scanStatusText');
+    const statusDot = document.querySelector('.scanner-status-dot');
+    
+    statusText.textContent = "Requesting permission...";
+    
+    Html5Qrcode.getCameras().then(cameras => {
+        if (cameras && cameras.length > 0) {
+            allCameras = cameras;
+            const cameraSelect = document.getElementById('cameraSelect');
+            cameraSelect.replaceChildren(...cameras.map(camera => {
+                const option = document.createElement('option');
+                option.value = camera.id;
+                option.textContent = camera.label;
+                return option;
+            }));
+            
+            if (cameras.length > 1) {
+                cameraSelect.classList.remove('d-none');
+                document.getElementById('switchCamBtn').classList.remove('d-none');
+            }
+            
+            // Prefer back camera
+            const backCam = cameras.find(c => {
+                const label = c.label.toLowerCase();
+                return label.includes('back') || label.includes('rear') || label.includes('environment');
+            });
+            currentCameraId = backCam ? backCam.id : cameras[0].id;
+            cameraSelect.value = currentCameraId;
+            
+            startCamera(currentCameraId);
+        } else {
+            // Fallback for some browsers where getCameras() fails but facingMode works
+            console.warn("No cameras found via getCameras, trying facingMode fallback...");
+            startCamera({ facingMode: "environment" });
+        }
+    }).catch(err => {
+        console.error("Camera access error:", err);
+        statusText.textContent = "Permission Denied";
+        statusDot.classList.replace('text-success', 'text-danger');
+        // Final fallback
+        startCamera({ facingMode: "environment" });
+    });
+  }
+
+  function startCamera(cameraConfig) {
+    const statusText = document.getElementById('scanStatusText');
+    
+    if (html5QrCode) {
+        html5QrCode.stop().then(() => doStart(cameraConfig)).catch(() => doStart(cameraConfig));
+    } else {
+        doStart(cameraConfig);
+    }
+  }
+
+  function doStart(cameraConfig) {
+    const statusText = document.getElementById('scanStatusText');
+    statusText.textContent = "Launching camera...";
+    
+    if (html5QrCode) {
+        try { html5QrCode.clear(); } catch(e) {}
+    }
+    
+    html5QrCode = new Html5Qrcode("qr-reader");
+    const config = {
+       fps: 20,
+       qrbox: { width: 250, height: 250 },
+       aspectRatio: 1.0,
+       disableFlip: false
+    };
+    
+    html5QrCode.start(cameraConfig, config, onScanSuccess, (msg) => { /* Quiet */ })
+    .then(() => {
+        statusText.textContent = "Active & Ready";
+        document.querySelector('.scanner-laser').style.display = 'block';
+        setupCameraControls();
+    })
+    .catch(err => {
+        console.error("Scanner Start Error:", err);
+        statusText.textContent = "Camera Error";
+        // If specific ID failed, try generic environment
+        if (typeof cameraConfig === 'string') {
+             console.log("Retrying with facingMode: environment...");
+             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess).catch(e => {
+                 statusText.textContent = "Hardware Blocked";
+             });
+        }
+    });
+  }
+
+  function setupCameraControls() {
+    try {
+        const capabilities = html5QrCode.getRunningTrackCapabilities();
+        const settings = html5QrCode.getRunningTrackSettings();
+        
+        const torchBtn = document.getElementById('torchBtn');
+        if (capabilities.torch) {
+            torchBtn.classList.remove('d-none');
+            torchOn = settings.torch || false;
+            torchBtn.classList.toggle('active', torchOn);
+        }
+
+        const zoomCont = document.getElementById('zoomSliderContainer');
+        if (capabilities.zoom) {
+            zoomCont.classList.remove('d-none');
+            const slider = document.getElementById('zoomSlider');
+            slider.min = capabilities.zoom.min; 
+            slider.max = capabilities.zoom.max;
+            slider.step = capabilities.zoom.step || 0.1; 
+            slider.value = settings.zoom || capabilities.zoom.min;
+            slider.oninput = (e) => {
+                html5QrCode.applyVideoConstraints({ advanced: [{ zoom: parseFloat(e.target.value) }] });
+            };
+        }
+    } catch(e) {
+        console.warn("Extended camera controls not supported:", e);
+    }
+  }
+
+  function switchCamera() {
+    if (!allCameras.length) return;
+    const currentIndex = allCameras.findIndex(c => c.id === currentCameraId);
+    const nextIndex = (currentIndex + 1) % allCameras.length;
+    currentCameraId = allCameras[nextIndex].id;
+    document.getElementById('cameraSelect').value = currentCameraId;
+    startCamera(currentCameraId);
+  }
+
+  function changeCamera(id) {
+    currentCameraId = id;
+    startCamera(id);
+  }
+
+  function toggleTorch() {
+    if (!html5QrCode || !html5QrCode.isScanning) return;
+    torchOn = !torchOn;
+    html5QrCode.applyVideoConstraints({ advanced: [{ torch: torchOn }] })
+        .then(() => document.getElementById('torchBtn').classList.toggle('active', torchOn))
+        .catch(() => { torchOn = !torchOn; });
+  }
+
+  let fileScanner = null;
+
+  function captureAndScan() {
+      if (isProcessingScan) return;
+      const video = document.querySelector('#qr-reader video');
+      if (!video) return;
+      
+      isProcessingScan = true;
+      const statusText = document.getElementById('scanStatusText');
+      statusText.textContent = "Analyzing frame...";
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth; 
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      
+      canvas.toBlob(blob => {
+          const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
+          if (!fileScanner) fileScanner = new Html5Qrcode("qr-reader-hidden");
+          fileScanner.scanFile(file, false)
+              .then(decodedText => processDetectedToken(decodedText))
+              .catch(() => {
+                  showFlash('red');
+                  statusText.textContent = "No QR detected";
+                  setTimeout(() => { isProcessingScan = false; statusText.textContent = "Active & Ready"; }, 1500);
+              });
+      }, 'image/jpeg', 0.95);
+  }
+
+  document.getElementById('galleryInput').onchange = e => {
+      if (!e.target.files.length || isProcessingScan) return;
+      isProcessingScan = true;
+      const file = e.target.files[0];
+      const statusText = document.getElementById('scanStatusText');
+      statusText.textContent = "Reading file...";
+      
+      if (!fileScanner) fileScanner = new Html5Qrcode("qr-reader-hidden");
+      fileScanner.scanFile(file, false)
+          .then(decodedText => processDetectedToken(decodedText))
+          .catch(err => {
+              console.error("Gallery scan error:", err);
+              showFlash('red');
+              showPopup('error', 'Invalid Image', 'No QR code found in this photo.');
+              setTimeout(() => { isProcessingScan = false; statusText.textContent = "Active & Ready"; }, 2000);
+          });
+      e.target.value = ""; // Reset input
+  };
+
+  function onScanSuccess(text) {
+    if (isProcessingScan) return;
+    isProcessingScan = true;
+    processDetectedToken(text);
+  }
+
+  function processDetectedToken(rawText) {
+    const statusText = document.getElementById('scanStatusText');
+    statusText.textContent = "Verifying...";
+
+    const formData = new URLSearchParams();
+    formData.append('token', rawText);
+
+    fetch('/organizer/events/' + eventId + '/scan', {
+      method: 'POST',
+      headers: { 
+          'Content-Type': 'application/x-www-form-urlencoded',
+          [csrfHeader]: csrfToken
+      },
+      body: formData.toString()
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        playSuccess(); launchConfetti(); showFlash('green');
+        let timeStr = data.scannedAt ? new Date(data.scannedAt).toLocaleTimeString() : new Date().toLocaleTimeString();
+        showPopup('success', 'Verified!', data.studentName + ' checked in at ' + timeStr);
+        document.getElementById('attendedCount').textContent = data.attendedCount;
+        statusText.textContent = "Done!";
+      } else {
+        playError(); showFlash('red');
+        showPopup('error', data.alreadyAttended ? 'Duplicate' : 'Denied', data.message);
+        statusText.textContent = "Failed";
+      }
+    }).catch(err => {
+        showPopup('error', 'Network Error', 'Server unreachable.');
+        statusText.textContent = "Error";
+    });
+  }
+
+  function submitManualToken() {
+      const input = document.getElementById('manualToken');
+      const token = input.value.trim();
+      if (!token) return;
+      isProcessingScan = true;
+      processDetectedToken(token);
+      input.value = '';
+  }
+
+  function showFlash(color) {
+      const flash = document.getElementById('flashOverlay');
+      flash.className = 'flash-overlay flash-' + color;
+      flash.style.opacity = '1';
+      setTimeout(() => flash.style.opacity = '0', 300);
+  }
+
+  function showPopup(type, title, message) {
+      const p = document.getElementById('resultPopup');
+      const icon = document.getElementById('resultIcon');
+      const iconInner = document.getElementById('resultIconInner');
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultMessage').textContent = message;
+      
+      if (type === 'success') {
+          icon.className = 'result-icon icon-success';
+          iconInner.className = 'bi bi-check-lg';
+      } else {
+          icon.className = 'result-icon icon-error';
+          iconInner.className = 'bi bi-x-lg';
+      }
+      p.classList.add('show');
+  }
+
+  function hidePopupAndResume() {
+      document.getElementById('resultPopup').classList.remove('show');
+      isProcessingScan = false;
+      document.getElementById('scanStatusText').textContent = "Ready to scan";
+  }
+
+  // Audio & Confetti
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let audioCtx = null;
+  function getAudioCtx() { if (!audioCtx) audioCtx = new AudioCtx(); return audioCtx; }
+  function playBeep(f, d, t) {
+    try {
+        const ctx = getAudioCtx();
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = f; o.type = t;
+        g.gain.setValueAtTime(0.1, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + d);
+        o.start(); o.stop(ctx.currentTime + d);
+    } catch(e) {}
+  }
+  function playSuccess() { playBeep(600,0.1,'sine'); setTimeout(()=>playBeep(800,0.1,'sine'),100); }
+  function playError() { playBeep(200,0.3,'square'); }
+
+  const confCnv = document.getElementById('confettiCanvas');
+  const confCtx = confCnv.getContext('2d');
+  let confPieces = [];
+  function launchConfetti() {
+    confPieces = [];
+    confCnv.width = window.innerWidth; confCnv.height = window.innerHeight;
+    for(let i=0; i<60; i++) {
+        confPieces.push({ 
+            x: Math.random()*confCnv.width, y: confCnv.height, 
+            vx: (Math.random()-0.5)*8, vy: -(Math.random()*12+8), 
+            size: Math.random()*10+5, color: ['#10B981','#3B82F6','#F59E0B'][Math.floor(Math.random()*3)], 
+            life: 1, rot: Math.random()*360, vRot: (Math.random()-0.5)*10
+        });
+    }
+    requestAnimationFrame(animateConfetti);
+  }
+  function animateConfetti() {
+    confCtx.clearRect(0,0,confCnv.width,confCnv.height); 
+    let alive = false;
+    confPieces.forEach(p => {
+      if(p.life <= 0) return; 
+      alive = true;
+      p.x += p.vx; p.vy += 0.25; p.y += p.vy; p.life -= 0.008; p.rot += p.vRot;
+      confCtx.save();
+      confCtx.translate(p.x, p.y);
+      confCtx.rotate(p.rot * Math.PI / 180);
+      confCtx.fillStyle = p.color; 
+      confCtx.globalAlpha = p.life;
+      confCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+      confCtx.restore();
+    });
+    if(alive) requestAnimationFrame(animateConfetti);
+  }
+
+  window.addEventListener('load', initScanner);
+</script>
+</body>
+</html>

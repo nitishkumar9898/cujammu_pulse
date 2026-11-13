@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>My Certificates — CUJAMMU PULSE</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: studentSidebar(activePage='certificates')}"></div>
+<div class="main-content">
+  <div th:replace="~{fragments/navbar :: topNav('My Certificates')}"></div>
+  <div class="page-content fade-in">
+    <div th:replace="~{fragments/navbar :: alerts}"></div>
+
+    <div th:if="${certificates == null or certificates.isEmpty()}" class="text-center py-5">
+      <i class="bi bi-award display-1 text-muted opacity-25"></i>
+      <h5 class="text-muted mt-3">No Certificates Yet</h5>
+      <p class="text-muted small">Certificates appear after approved policy and attendance evidence are finalized.</p>
+      <a href="/student/events" class="btn btn-primary"><i class="bi bi-calendar3 me-1"></i>Browse Events</a>
+    </div>
+
+    <div th:unless="${certificates == null or certificates.isEmpty()}" class="row g-4">
+      <div class="col-md-6 col-lg-4" th:each="cert : ${certificates}">
+        <div class="card border-0 shadow-sm rounded-4 hover-lift h-100">
+          <!-- Certificate preview header -->
+          <div class="card-header border-0 text-white text-center py-4 rounded-top-4 student-cert-header">
+            <i class="bi bi-award display-4"></i>
+            <h6 class="fw-bold mt-2 mb-0">Verified Point Attendance</h6>
+          </div>
+          <div class="card-body p-4">
+            <h6 class="fw-bold mb-1" th:text="${cert.event.title}">Event Title</h6>
+            <p class="text-muted small mb-2">
+              <i class="bi bi-calendar3 me-1"></i>
+              <span th:text="${#temporals.format(cert.event.eventDate, 'dd MMM yyyy')}">Date</span>
+              &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt me-1"></i>
+              <span th:text="${cert.event.venue}">Venue</span>
+            </p>
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <span class="badge bg-success"><i class="bi bi-patch-check me-1"></i>Verified</span>
+              <span class="text-muted small" th:text="'#' + ${cert.certificateNumber}">CUJ-123</span>
+            </div>
+            <p class="text-muted small mb-0">
+              <i class="bi bi-clock me-1"></i>Issued:
+              <span th:text="${#temporals.format(cert.issuedAt, 'dd MMM yyyy, hh:mm a')}">Date</span>
+            </p>
+          </div>
+          <div class="card-footer bg-transparent border-0 px-4 pb-4 pt-0">
+              <div class="d-grid gap-2">
+                <a th:href="@{/student/certificates/{id}/download(id=${cert.registration.id})}" 
+                   class="btn btn-primary py-2 fw-bold rounded-3">
+                  <i class="bi bi-file-earmark-pdf-fill me-2"></i>Download PDF
+                </a>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <button class="btn btn-outline-success btn-sm w-100 share-wa-btn" 
+                            th:data-title="${cert.event.title}" th:data-certno="${cert.certificateNumber}">
+                      <i class="bi bi-whatsapp me-1"></i>Share
+                    </button>
+                  </div>
+                  <div class="col-6">
+                    <button class="btn btn-outline-primary btn-sm w-100 share-li-btn" 
+                            th:data-title="${cert.event.title}">
+                      <i class="bi bi-linkedin me-1"></i>LinkedIn
+                    </button>
+                  </div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<nav class="container my-3 d-flex gap-3" aria-label="Certificate pages">
+  <a th:if="${certificatePage > 0}" th:href="@{/student/certificates(page=${certificatePage - 1})}">Previous certificates</a>
+  <a th:if="${certificateHasNext}" th:href="@{/student/certificates(page=${certificatePage + 1})}">More certificates</a>
+</nav>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/js/bootstrap.bundle.min.js"></script>
+<div th:replace="~{fragments/navbar :: chatbot}"></div>
+<script th:replace="~{fragments/navbar :: sidebarJs}"></script>
+<script>
+document.querySelectorAll('.share-wa-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var title = this.getAttribute('data-title');
+    var certNo = this.getAttribute('data-certno');
+    var msg = encodeURIComponent('\uD83C\uDF93 I earned a Certificate of Participation for "' + title + '"!\nCertificate No: ' + certNo + '\nVerify at: ' + window.location.origin + '/certificates/verify/' + certNo);
+    window.open('https://wa.me/?text=' + msg, '_blank');
+  });
+});
+document.querySelectorAll('.share-li-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var title = this.getAttribute('data-title');
+    var msg = encodeURIComponent('I earned a Certificate of Participation for "' + title + '" at CUJAMMU PULSE! \uD83C\uDF93');
+    window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(window.location.origin) + '&title=' + msg, '_blank');
+  });
+});
+</script>
+</body>
+</html>

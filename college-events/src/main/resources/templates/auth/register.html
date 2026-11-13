@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Register — CUJAMMU PULSE</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+</head>
+<body class="auth-bg py-4">
+<div class="container" style="max-width:560px">
+  <div class="text-center mb-4">
+    <a href="/" class="text-decoration-none d-inline-flex align-items-center gap-2">
+      <img th:src="@{/images/cujammu_logo_circle.png}" src="/images/cujammu_logo_circle.png" alt="CUJammu Logo" style="width: 52px; height: 52px; border-radius: 50%; object-fit: contain;">
+      <span class="fw-bold fs-4" style="color: #0B2238;">CUJAMMU<span style="color: #D4AF37;">-PULSE</span></span>
+    </a>
+  </div>
+
+  <div class="card border-0 shadow-lg rounded-4">
+    <div class="card-body p-4 p-md-5">
+      <h4 class="fw-bold text-center mb-1">Create Your Account</h4>
+      <p class="text-muted text-center small mb-4">Join the Central University of Jammu event ecosystem</p>
+
+      <div th:if="${errorMsg}" class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMsg}"></span>
+      </div>
+
+      <form th:action="@{/register}" method="post" th:object="${dto}" novalidate>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Full Name *</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-person text-muted"></i></span>
+            <input type="text" th:field="*{name}" class="form-control"
+                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                   placeholder="Your full name" required/>
+            <div class="invalid-feedback" th:errors="*{name}">Name error</div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold" id="emailLabel">Email Address *</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-envelope text-muted"></i></span>
+            <input type="email" th:field="*{email}" id="emailInput" class="form-control"
+                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                   placeholder="24beccs63.ccs@cujammu.ac.in" required/>
+            <div class="invalid-feedback" th:errors="*{email}">Email error</div>
+          </div>
+          <div class="form-text mt-1 text-primary fw-medium" id="emailHelpText">
+            <i class="bi bi-shield-check me-1"></i>Format: rollno.dept@cujammu.ac.in (e.g. 24beccs63.ccs@cujammu.ac.in with numbers)
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">I am registering as *</label>
+          <div class="d-flex flex-wrap gap-2">
+            <div th:each="role : ${roles}" class="form-check flex-grow-1" style="min-width: 90px;">
+              <label class="form-check-label w-100">
+                <div class="border rounded-3 p-2 text-center role-card"
+                     th:id="${'role-' + role.name()}" style="cursor: pointer; transition: all 0.2s;">
+                  <i th:class="'bi fs-4 d-block mb-1 ' + (${role.name() == 'STUDENT'} ? 'bi-mortarboard text-primary' : (${role.name() == 'FACULTY'} ? 'bi-person-video3 text-success' : (${role.name() == 'STAFF'} ? 'bi-shield-lock text-warning' : (${role.name() == 'ORGANIZER'} ? 'bi-megaphone text-info' : 'bi-award text-danger'))))"></i>
+                  <span class="fw-bold small" th:text="${role.name()}">Role</span>
+                  <input type="radio" th:field="*{role}" th:value="${role}" class="d-none role-radio"
+                         th:id="${'r-' + role.name()}"/>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Department *</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-building text-muted"></i></span>
+            <input type="text" th:field="*{department}" class="form-control"
+                   th:classappend="${#fields.hasErrors('department')} ? 'is-invalid'"
+                   placeholder="e.g. Computer Science" required/>
+            <div class="invalid-feedback" th:errors="*{department}">Dept error</div>
+          </div>
+        </div>
+
+        <!-- Enrollment Number (for Students) -->
+        <div class="mb-3" id="enrollmentField">
+          <label class="form-label fw-semibold">Enrollment / Roll Number</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-card-text text-muted"></i></span>
+            <input type="text" th:field="*{enrollmentNo}" class="form-control"
+                   placeholder="e.g. CUJ/2023/CS/001"/>
+          </div>
+          <div class="form-text">Required for student identity verification and event registration.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Phone Number</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-telephone text-muted"></i></span>
+            <input type="tel" th:field="*{phone}" class="form-control"
+                   th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'"
+                   placeholder="10-digit phone number"/>
+            <div class="invalid-feedback" th:errors="*{phone}">Phone error</div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Password *</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-lock text-muted"></i></span>
+            <input type="password" th:field="*{password}" id="pwd1" class="form-control"
+                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                   placeholder="Min 8 chars, upper+lower+digit" required/>
+            <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('pwd1','e1')">
+              <i class="bi bi-eye" id="e1"></i></button>
+            <div class="invalid-feedback" th:errors="*{password}">Pwd error</div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Confirm Password *</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-lock-fill text-muted"></i></span>
+            <input type="password" th:field="*{confirmPassword}" id="pwd2" class="form-control"
+                   th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
+                   placeholder="Re-enter password" required/>
+            <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('pwd2','e2')">
+              <i class="bi bi-eye" id="e2"></i></button>
+            <div class="invalid-feedback" th:errors="*{confirmPassword}">Confirm error</div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-lg w-100 fw-bold text-white"
+                style="background:#173e59;border:1px solid #173e59">
+          <i class="bi bi-person-plus me-2"></i>Create Account
+        </button>
+      </form>
+
+      <div class="text-center mt-3">
+        <span class="text-muted">Already registered?</span>
+        <a href="/login" class="text-primary fw-semibold ms-1">Sign In</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function togglePwd(inputId,iconId){
+  const i=document.getElementById(inputId),e=document.getElementById(iconId);
+  if(i.type==='password'){i.type='text';e.className='bi bi-eye-slash';}
+  else{i.type='password';e.className='bi bi-eye';}
+}
+// Dynamic Role Configuration
+const emailInput = document.getElementById('emailInput');
+const emailHelpText = document.getElementById('emailHelpText');
+const enrollmentField = document.getElementById('enrollmentField');
+
+document.querySelectorAll('.role-radio').forEach(radio => {
+  radio.addEventListener('change', () => {
+    document.querySelectorAll('.role-card').forEach(c => c.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10'));
+    if (radio.checked) {
+      document.getElementById('role-' + radio.value).classList.add('border-primary', 'bg-primary', 'bg-opacity-10');
+      
+      if (radio.value === 'STUDENT') {
+        emailInput.placeholder = '24beccs63.ccs@cujammu.ac.in';
+        emailHelpText.innerHTML = '<i class="bi bi-shield-check me-1"></i>Format: rollno.dept@cujammu.ac.in (e.g. 24beccs63.ccs@cujammu.ac.in with numbers)';
+        enrollmentField.style.display = 'block';
+      } else if (radio.value === 'FACULTY') {
+        emailInput.placeholder = 'mann.ccs@cujammu.ac.in';
+        emailHelpText.innerHTML = '<i class="bi bi-shield-check me-1"></i>Format: name.dept@cujammu.ac.in (no digits, e.g. mann.ccs@cujammu.ac.in)';
+        enrollmentField.style.display = 'none';
+      } else if (radio.value === 'STAFF') {
+        emailInput.placeholder = 'sula.adm@cujammu.ac.in';
+        emailHelpText.innerHTML = '<i class="bi bi-shield-check me-1"></i>Format: username.branch@cujammu.ac.in (e.g. sula.adm@cujammu.ac.in / warden.hostel@cujammu.ac.in)';
+        enrollmentField.style.display = 'none';
+      } else if (radio.value === 'ORGANIZER') {
+        emailInput.placeholder = 'office.math@cujammu.ac.in';
+        emailHelpText.innerHTML = '<i class="bi bi-shield-check me-1"></i>Format: office.dept@cujammu.ac.in (e.g. office.math@cujammu.ac.in)';
+        enrollmentField.style.display = 'none';
+      } else if (radio.value === 'ALUMNI') {
+        emailInput.placeholder = 'nitish.cujalumni@gmail.com';
+        emailHelpText.innerHTML = '<i class="bi bi-info-circle me-1 text-warning"></i>Alumni Notice: Personal email (e.g. Gmail) allowed as college mail is deactivated. Verified by OTP.';
+        enrollmentField.style.display = 'none';
+      }
+    }
+  });
+});
+</script>
+<script src="/js/theme-switcher.js"></script>
+</body>
+</html>

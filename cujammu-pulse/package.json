@@ -1,0 +1,54 @@
+{
+  "name": "cujammu-pulse-universal",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "web": "expo start --web",
+    "android": "expo run:android",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "test:web": "playwright test",
+    "build:web": "expo export --platform web",
+    "build:android": "expo export --platform android --output-dir dist-android"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "~58.0.14",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "expo": "~58.0.19",
+    "expo-auth-session": "~58.0.15",
+    "expo-crypto": "~58.0.7",
+    "expo-document-picker": "~58.0.4",
+    "expo-file-system": "~58.0.13",
+    "expo-secure-store": "~58.0.2",
+    "expo-sharing": "~58.0.21",
+    "expo-web-browser": "~58.0.7",
+    "qrcode": "1.5.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-native": "0.88.0",
+    "react-native-safe-area-context": "~5.10.1",
+    "react-native-svg": "15.16.0",
+    "react-native-web": "^0.21.4"
+  },
+  "overrides": {
+    "glob": "^14.0.3",
+    "minimatch": "^11.0.3",
+    "xcode": {
+      "uuid": "11.1.1"
+    },
+    "expo": {
+      "@expo/cli": {
+        "zod": "4.6.6"
+      }
+    }
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/qrcode": "1.5.6",
+    "@types/react": "~19.3.0",
+    "typescript": "6.0.3"
+  }
+}

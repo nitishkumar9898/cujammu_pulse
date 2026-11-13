@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Edit Event — CUJAMMU PULSE</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="/css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: organizerSidebar(activePage='events')}"></div>
+<div class="main-content">
+  <div th:replace="~{fragments/navbar :: topNav('Edit Event')}"></div>
+  <div class="page-content fade-in page-narrow">
+    <div th:replace="~{fragments/navbar :: alerts}"></div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <h6 class="fw-bold mb-0"><i class="bi bi-pencil me-2 text-warning"></i>Edit Event</h6>
+        <p class="text-muted small mb-0">Editing will resubmit for admin approval.</p>
+      </div>
+      <div class="card-body p-4">
+        <form th:action="'/organizer/events/' + ${event.id} + '/edit'" method="post"
+              th:object="${dto}" enctype="multipart/form-data" novalidate>
+          <input type="hidden" th:field="*{expectedLifecycleVersion}" />
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Event Title *</label>
+              <input type="text" th:field="*{title}" class="form-control form-control-lg" aria-label="Event Title" title="Event Title" placeholder="Enter event title"
+                     th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'" required/>
+              <div class="invalid-feedback" th:errors="*{title}">Error</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Description *</label>
+              <textarea th:field="*{description}" class="form-control" rows="5" aria-label="Description" title="Description" placeholder="Enter event description"
+                        th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'" required></textarea>
+              <div class="invalid-feedback" th:errors="*{description}">Error</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Category *</label>
+              <select th:field="*{categoryId}" class="form-select" required aria-label="Category" title="Category">
+                <option value="">Select Category</option>
+                <option th:each="cat : ${categories}" th:value="${cat.id}"
+                        th:text="${cat.name}">Cat</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Venue *</label>
+              <input type="text" th:field="*{venue}" class="form-control" required aria-label="Venue" title="Venue" placeholder="Enter venue"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Event Date &amp; Time (IST) *</label>
+              <input type="datetime-local" th:field="*{eventDate}" class="form-control" required aria-label="Event Date and Time" title="Event Date and Time" placeholder="Select date and time"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="eventEndsAt">Event end time (optional, IST)</label>
+              <input type="datetime-local" th:field="*{eventEndsAt}" class="form-control"
+                     th:classappend="${#fields.hasErrors('eventEndsAt') or #fields.hasErrors('eventIntervalValid')} ? 'is-invalid'"/>
+              <div class="form-text">Enter the planned finish time for accurate calendar clash checks. Leave blank when it is unknown.</div>
+              <div class="invalid-feedback" th:errors="*{eventEndsAt}">Error</div>
+              <div class="invalid-feedback" th:errors="*{eventIntervalValid}">Error</div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Max Seats *</label>
+              <input type="number" th:field="*{maxSeats}" class="form-control" min="1" required aria-label="Max Seats" title="Max Seats" placeholder="e.g. 100"/>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Fee (₹)</label>
+              <input type="number" th:field="*{fees}" class="form-control" min="0" step="0.01" aria-label="Fee" title="Fee" placeholder="0"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Contact Email</label>
+              <input type="email" th:field="*{contactEmail}" class="form-control" aria-label="Contact Email" title="Contact Email" placeholder="contact@example.com"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">New Banner Image</label>
+              <input type="file" th:field="*{bannerImage}" class="form-control" aria-label="New Banner Image" title="New Banner Image" placeholder="Upload banner image"
+                     accept="image/jpeg,image/png,image/webp,image/gif"/>
+              <div class="form-text" th:if="${event.bannerImage != null}">
+                Current banner will be kept if no new image uploaded.
+              </div>
+            </div>
+
+            <!-- ─── Certificate Settings ─────────────────────────────────── -->
+            <div class="col-12">
+              <div class="card border-0 bg-light rounded-4 p-3">
+                <h6 class="fw-bold mb-3"><i class="bi bi-award-fill me-2 text-warning"></i>Certificate Settings</h6>
+                <div class="row g-3">
+                  <div class="col-12">
+                    <div class="form-check form-switch d-flex align-items-center gap-3">
+                      <input class="form-check-input cert-toggle-switch" type="checkbox" role="switch"
+                             th:field="*{generateCertificate}" id="generateCertificateToggle"/>
+                      <label class="form-check-label fw-semibold" for="generateCertificateToggle">
+                        Generate Certificate after Attendance?
+                        <span class="badge bg-success ms-2">Enabled</span>
+                      </label>
+                    </div>
+                    <div class="form-text mt-1">Students will receive a downloadable certificate after QR scan attendance.</div>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label fw-semibold">Custom Certificate Template <span class="text-muted fw-normal">(Optional)</span></label>
+                    <input type="file" th:field="*{certificateTemplate}" class="form-control" aria-label="Custom Certificate Template" title="Custom Certificate Template" placeholder="Upload certificate template"
+                           accept="image/jpeg,image/png"/>
+                    <div class="form-text">
+                      Upload a PNG/JPG background. Student name &amp; event details will be overlaid automatically.
+                      <span th:if="${event.certificateTemplatePath != null}" class="text-success fw-bold">
+                        ✅ Custom template already uploaded. Upload again to replace.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 d-flex gap-3">
+              <button type="submit" class="btn btn-warning fw-bold px-5">
+                <i class="bi bi-arrow-up-circle me-2"></i>Update &amp; Resubmit
+              </button>
+              <a href="/organizer/events" class="btn btn-outline-secondary px-4">Cancel</a>
+            </div>
+          </div>
+        </form>
+
+        <!-- Dynamic Components for Advanced Features -->
+        <hr class="my-5" />
+        <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-mic-fill me-2"></i>Manage Event Speakers</h5>
+        <button type="button" class="btn btn-sm btn-outline-primary mb-3" data-bs-toggle="modal" data-bs-target="#addSpeakerModal">
+          <i class="bi bi-plus-circle"></i> Add Speaker
+        </button>
+        <div class="row g-3 mb-5">
+          <div class="col-12" th:if="${speakers.isEmpty()}"><p class="text-muted small">No speakers added yet.</p></div>
+          <div class="col-md-4" th:each="spk : ${speakers}">
+            <div class="card bg-primary bg-opacity-10 border-0 h-100 shadow-sm">
+              <div class="card-body">
+                <h6 class="fw-bold mb-1" th:text="${spk.name}">Speaker Name</h6>
+                <p class="small text-muted mb-0" th:text="${spk.bio}">Bio</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h5 class="fw-bold mb-3 text-success"><i class="bi bi-building me-2"></i>Manage Event Sponsors</h5>
+        <button type="button" class="btn btn-sm btn-outline-success mb-3" data-bs-toggle="modal" data-bs-target="#addSponsorModal">
+          <i class="bi bi-plus-circle"></i> Add Sponsor
+        </button>
+        <div class="row g-3">
+          <div class="col-12" th:if="${sponsors.isEmpty()}"><p class="text-muted small">No sponsors added yet.</p></div>
+          <div class="col-md-4" th:each="spo : ${sponsors}">
+            <div class="card bg-success bg-opacity-10 border-0 h-100 shadow-sm">
+              <div class="card-body">
+                <h6 class="fw-bold mb-1" th:text="${spo.companyName}">Sponsor</h6>
+                <span class="badge bg-success" th:text="${spo.sponsorshipTier}">Tier</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Speaker Modal -->
+<div class="modal fade" id="addSpeakerModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Add Speaker</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close modal"><span class="visually-hidden">Close</span></button>
+      </div>
+      <div class="modal-body">
+        <form th:action="'/organizer/events/' + ${event.id} + '/speakers/add'" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Full Name *</label>
+            <input type="text" name="name" class="form-control" required aria-label="Full Name" title="Full Name" placeholder="Enter speaker name"/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Short Bio *</label>
+            <textarea name="bio" class="form-control" rows="2" maxlength="1000" required aria-label="Short Bio" title="Short Bio" placeholder="Enter short bio"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">LinkedIn URL (Optional)</label>
+            <input type="url" name="linkedInUrl" class="form-control" aria-label="LinkedIn URL" title="LinkedIn URL" placeholder="https://linkedin.com/in/..."/>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 fw-bold">Save Speaker</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Sponsor Modal -->
+<div class="modal fade" id="addSponsorModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Add Sponsor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close modal"><span class="visually-hidden">Close</span></button>
+      </div>
+      <div class="modal-body">
+        <form th:action="'/organizer/events/' + ${event.id} + '/sponsors/add'" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Company Name *</label>
+            <input type="text" name="companyName" class="form-control" required aria-label="Company Name" title="Company Name" placeholder="Enter company name"/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Sponsorship Tier *</label>
+            <select name="tier" class="form-select" required aria-label="Sponsorship Tier" title="Sponsorship Tier">
+              <option value="PLATINUM">Platinum</option>
+              <option value="GOLD">Gold</option>
+              <option value="SILVER">Silver</option>
+              <option value="BRONZE">Bronze</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Website URL (Optional)</label>
+            <input type="url" name="websiteUrl" class="form-control" aria-label="Website URL" title="Website URL" placeholder="https://example.com"/>
+          </div>
+          <button type="submit" class="btn btn-success w-100 fw-bold">Save Sponsor</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:replace="~{fragments/navbar :: sidebarJs}"></script>
+</body>
+</html>
